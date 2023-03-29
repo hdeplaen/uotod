@@ -1,4 +1,4 @@
-import scipy
+# import scipy
 
 def hungarian(C):
     r"""

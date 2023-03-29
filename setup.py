@@ -25,10 +25,10 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/hdeplaen/uotod',
-    download_url='https://github.com/hdeplaen/kerch/archive/{}.tar.gz'.format(kerch.__version__),
+    download_url='https://github.com/hdeplaen/uotod/archive/{}.tar.gz'.format(uotod.__version__),
     project_urls = {
         "Documentation": "https://hdeplaen.github.io/uotod/doc",
-        "Bug Tracker": "https://github.com/hdeplaen/uotod/doc/issues",
+        "Bug Tracker": "https://github.com/hdeplaen/uotod/issues",
         "E-DUALITY": "https://www.esat.kuleuven.be/stadius/E/",
         "ESAT-STADIUS": "https://www.esat.kuleuven.be/stadius/",
         "ESAT-PSI": "https://www.esat.kuleuven.be/psi/",
