@@ -2,3 +2,4 @@ scipy
 torch
 matplotlib
 numpy
+pot

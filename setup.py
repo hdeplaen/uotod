@@ -56,5 +56,7 @@ setuptools.setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Scientific/Engineering :: Information Analysis'
-    ]
+    ],
+    packages=['uotod'],
+    package_dir={'':""}
 )

@@ -4,6 +4,7 @@ __credits__ = "KU Leuven"
 __status__ = "beta"
 __date__ = "March 2023"
 
-from . import loss
 from . import match
+from . import loss
+from . import cost
 from . import colorboxes

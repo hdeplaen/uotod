@@ -1,2 +1,4 @@
 *__pycache__*
 *.pyc
+/dist
+/uotod.egg-info
