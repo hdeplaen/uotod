@@ -1,7 +1,8 @@
 # Unbalanced Optimal Transport: A Unified Framework for Object Detection
 [![PyPI version](https://badge.fury.io/py/uotod.svg)](https://badge.fury.io/py/uotod)
-[![License: European Union Public License](https://img.shields.io/badge/License-EUPL-lightgrey)](https://commission.europa.eu/content/european-union-public-licence_en)
-![GitHub all releases](https://img.shields.io/github/downloads/hdeplaen/uotod/total)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+
+[//]: # (![GitHub all releases]&#40;https://img.shields.io/github/downloads/hdeplaen/uotod/total&#41;)
 
 Henri De Plaen, Pierre-François De Plaen, Johan A. K. Suykens, Marc Proesmans, Tinne Tuytelaars, and Luc Van Gool. 2023. “Unbalanced Optimal Transport: A Unified Framework for Object Detection.” In *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)*.
 
