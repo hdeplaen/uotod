@@ -1,11 +1,12 @@
 # Unbalanced Optimal Transport: A Unified Framework for Object Detection
 [![PyPI version](https://badge.fury.io/py/uotod.svg)](https://badge.fury.io/py/uotod)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![GitHub all releases](https://img.shields.io/github/downloads/hdeplaen/uotod/total)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
-Henri De Plaen, Pierre-François De Plaen, Johan A. K. Suykens, Marc Proesmans, Tinne Tuytelaars, and Luc Van Gool. 2023. “Unbalanced Optimal Transport: A Unified Framework for Object Detection.” In *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)*.
+[//]: # (![GitHub all releases]&#40;https://img.shields.io/github/downloads/hdeplaen/uotod/total&#41;)
 
-Presented at CVPR 2023. The paper and additional resources can be found on the [following website](https://hdeplaen.github.io/uotod/).
+H. De Plaen, P.-F. De Plaen, J. A. K. Suykens, M. Proesmans, T. Tuytelaars, and L. Van Gool, “Unbalanced Optimal Transport: A Unified Framework for Object Detection,” in *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)*, Jun. 2023, pp. 3198–3207.
+
+This work will be presented at CVPR in June 2023. The paper and additional resources can be found on the [following website](https://hdeplaen.github.io/uotod/). The paper is in open access and can also be found on the [CVF website](https://openaccess.thecvf.com/content/CVPR2023/html/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.html) and shortly on IEEE Xplore.
 
 ![Different matching strategies. All are particular cases of Unbalanced Optimal Transport](img/illustration.png)
 
@@ -14,20 +15,117 @@ Presented at CVPR 2023. The paper and additional resources can be found on the [
 
 During training, supervised object detection tries to correctly match the predicted bounding boxes and associated classification scores to the ground truth. This is essential to determine which predictions are to be pushed towards which solutions, or to be discarded. Popular matching strategies include matching to the closest ground truth box (mostly used in combination with anchors), or matching via the Hungarian algorithm (mostly used in anchor-free methods). Each of these strategies comes with its own properties, underlying losses, and heuristics. We show how Unbalanced Optimal Transport unifies these different approaches and opens a whole continuum of methods in between. This allows for a finer selection of the desired properties. Experimentally, we show that training an object detection model with Unbalanced Optimal Transport is able to reach the state-of-the-art both in terms of Average Precision and Average Recall as well as to provide a faster initial convergence. The approach is well suited for GPU implementation, which proves to be an advantage for large-scale models.
 
+## Usage
+
+## Examples
+
+OT matching with GIoU loss:
+```python
+from uotod.match import OTMatching
+from uotod.loss.modules import GIoULoss
+
+ot = OTMatching(
+    loc_matching_module=GIoULoss(reduction="none"),
+    bg_cost=0.,
+)
+```
+
+Hungarian matching (bipartite) with GIoU loss:
+```python
+from uotod.match import HungarianMatching
+from uotod.loss.modules import GIoULoss
+
+hungarian = HungarianMatching(
+    loc_matching_module=GIoULoss(reduction="none"),
+    bg_cost=0.,
+)
+```
+
+Loss from SSD solved with Unbalanced Optimal Transport:
+
+```python
+from torch.nn import L1Loss, CrossEntropyLoss
+
+from uotod.match import OTMatching
+from uotod.loss import DetectionLoss
+from uotod.loss.modules import IoULoss
+
+matching_method = OTMatching(
+    cls_matching_module=None,  # No classification cost
+    loc_matching_module=IoULoss(reduction="none"),
+    bg_cost=0.5,  # Threshold for matching to background
+    is_anchor_based=True,  # Use anchor-based matching
+    ot_tau2=1e-3,  # Relax the constraint that each ground truth is matched to exactly one prediction
+)
+
+loss = DetectionLoss(
+    matching_method=matching_method,
+    cls_loss_module=CrossEntropyLoss(reduction="none"),
+    loc_loss_module=L1Loss(reduction="none"),
+)
+
+preds = ...
+targets = ...
+anchors = ...
+
+loss_value = loss(preds, targets, anchors)
+```
+
+Loss from DETR solved with Optimal Transport (num_classes=3):
+
+```python
+import torch
+from torch.nn import L1Loss, CrossEntropyLoss
+
+from uotod.match import OTMatching
+from uotod.loss import DetectionLoss
+from uotod.loss.modules import MultipleObjectiveLoss, GIoULoss, SoftmaxNegLoss
+
+matching_method = OTMatching(
+    cls_matching_module=SoftmaxNegLoss(reduction="none"),
+    loc_matching_module=MultipleObjectiveLoss(
+        losses=[GIoULoss(reduction="none"), L1Loss(reduction="none")],
+        coefficients=[1., 5.],
+    ),
+    bg_cost=0.,  # Does not influence the matching when using balanced OT
+)
+
+loss = DetectionLoss(
+    matching_method=matching_method,
+    cls_loss_module=CrossEntropyLoss(
+        reduction="none",
+        weight=torch.tensor([0.1, 1., 1.])  # down-weight the loss for the no-object class
+    ),
+    loc_loss_module=MultipleObjectiveLoss(
+        losses=[GIoULoss(reduction="none"), L1Loss(reduction="none")],
+        coefficients=[1., 5.],
+    ),
+)
+
+preds = ...
+targets = ...
+loss_value = loss(preds, targets)
+```
+
+
 ## Color Boxes Dataset
 ![Examples from the Color Boxes Dataset](img/colorboxes.png)
 
 ## BibTex
+If you make any use of our work, please refer to us as:
 ```bibtex
-@InProceedings{DePlaen_2023_CVPR,
-    author    = {De Plaen, Henri and De Plaen, Pierre-François and Suykens, Johan A. K. and Proesmans, Marc and Tuytelaars, Tinne and Van Gool, Luc},
+@InProceedings{De_Plaen_2023_CVPR,
+    author    = {De Plaen, Henri and De Plaen, Pierre-Fran\c{c}ois and Suykens, Johan A. K. and Proesmans, Marc and Tuytelaars, Tinne and Van Gool, Luc},
     title     = {Unbalanced Optimal Transport: A Unified Framework for Object Detection},
     booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
     month     = {June},
     year      = {2023},
-    pages     = {}
+    pages     = {3198-3207}
 }
 ```
+
+## Package
+The Python package will be available soon.
 
 ## Acknowledgements
 EU: The research leading to these results has received funding from the European Research Council under the European Union’s Horizon 2020 research and innovation program / ERC Advanced Grant E-DUALITY (787960). This paper reflects only the authors’ views and the Union is not liable for any use that may be made of the contained information. Research Council KUL: Optimization frameworks for deep kernel machines C14/18/068. Flemish Government: FWO: projects: GOA4917N (Deep Restricted Kernel Machines: Methods and Foundations), PhD/Postdoc grant; This research received funding from the Flemish Government (AI Research Program). All the authors are also affiliated to Leuven.AI - KU Leuven institute for AI, B-3000, Leuven, Belgium.
