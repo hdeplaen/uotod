@@ -1,1 +1,2 @@
-from .hungarian import hungarian
+from .hungarian import HungarianMatching
+from .OT import OTMatching

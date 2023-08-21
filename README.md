@@ -15,6 +15,99 @@ This work will be presented at CVPR in June 2023. The paper and additional resou
 
 During training, supervised object detection tries to correctly match the predicted bounding boxes and associated classification scores to the ground truth. This is essential to determine which predictions are to be pushed towards which solutions, or to be discarded. Popular matching strategies include matching to the closest ground truth box (mostly used in combination with anchors), or matching via the Hungarian algorithm (mostly used in anchor-free methods). Each of these strategies comes with its own properties, underlying losses, and heuristics. We show how Unbalanced Optimal Transport unifies these different approaches and opens a whole continuum of methods in between. This allows for a finer selection of the desired properties. Experimentally, we show that training an object detection model with Unbalanced Optimal Transport is able to reach the state-of-the-art both in terms of Average Precision and Average Recall as well as to provide a faster initial convergence. The approach is well suited for GPU implementation, which proves to be an advantage for large-scale models.
 
+## Usage
+
+## Examples
+
+OT matching with GIoU loss:
+```python
+from uotod.match import OTMatching
+from uotod.loss.modules import GIoULoss
+
+ot = OTMatching(
+    loc_matching_module=GIoULoss(reduction="none"),
+    bg_cost=0.,
+)
+```
+
+Hungarian matching (bipartite) with GIoU loss:
+```python
+from uotod.match import HungarianMatching
+from uotod.loss.modules import GIoULoss
+
+hungarian = HungarianMatching(
+    loc_matching_module=GIoULoss(reduction="none"),
+    bg_cost=0.,
+)
+```
+
+Loss from SSD solved with Unbalanced Optimal Transport:
+
+```python
+from torch.nn import L1Loss, CrossEntropyLoss
+
+from uotod.match import OTMatching
+from uotod.loss import DetectionLoss
+from uotod.loss.modules import IoULoss
+
+matching_method = OTMatching(
+    cls_matching_module=None,  # No classification cost
+    loc_matching_module=IoULoss(reduction="none"),
+    bg_cost=0.5,  # Threshold for matching to background
+    is_anchor_based=True,  # Use anchor-based matching
+    ot_tau2=1e-3,  # Relax the constraint that each ground truth is matched to exactly one prediction
+)
+
+loss = DetectionLoss(
+    matching_method=matching_method,
+    cls_loss_module=CrossEntropyLoss(reduction="none"),
+    loc_loss_module=L1Loss(reduction="none"),
+)
+
+preds = ...
+targets = ...
+anchors = ...
+
+loss_value = loss(preds, targets, anchors)
+```
+
+Loss from DETR solved with Optimal Transport (num_classes=3):
+
+```python
+import torch
+from torch.nn import L1Loss, CrossEntropyLoss
+
+from uotod.match import OTMatching
+from uotod.loss import DetectionLoss
+from uotod.loss.modules import MultipleObjectiveLoss, GIoULoss, SoftmaxNegLoss
+
+matching_method = OTMatching(
+    cls_matching_module=SoftmaxNegLoss(reduction="none"),
+    loc_matching_module=MultipleObjectiveLoss(
+        losses=[GIoULoss(reduction="none"), L1Loss(reduction="none")],
+        coefficients=[1., 5.],
+    ),
+    bg_cost=0.,  # Does not influence the matching when using balanced OT
+)
+
+loss = DetectionLoss(
+    matching_method=matching_method,
+    cls_loss_module=CrossEntropyLoss(
+        reduction="none",
+        weight=torch.tensor([0.1, 1., 1.])  # down-weight the loss for the no-object class
+    ),
+    loc_loss_module=MultipleObjectiveLoss(
+        losses=[GIoULoss(reduction="none"), L1Loss(reduction="none")],
+        coefficients=[1., 5.],
+    ),
+)
+
+preds = ...
+targets = ...
+loss_value = loss(preds, targets)
+```
+
+
 ## Color Boxes Dataset
 ![Examples from the Color Boxes Dataset](img/colorboxes.png)
 
