@@ -4,7 +4,8 @@ __credits__ = "KU Leuven"
 __status__ = "beta"
 __date__ = "March 2023"
 
+# IMPORTS
 from . import match
+from . import plot
 from . import loss
-from . import cost
-from . import colorboxes
+# from . import colorboxes

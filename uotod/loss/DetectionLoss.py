@@ -4,8 +4,8 @@ import torch
 from torch.nn.modules.loss import _Loss
 from torch import Tensor
 
-from ..match._MatchingMethod import _MatchingMethod
-from .modules import MultipleObjectiveLoss
+from ..match._Match import _Match
+from .MultipleObjectiveLoss import MultipleObjectiveLoss
 from ..utils import convert_target_to_dict
 
 
@@ -15,7 +15,7 @@ class DetectionLoss(_Loss):
     def __init__(self,
                  cls_loss_module: Union[MultipleObjectiveLoss, _Loss],
                  loc_loss_module: Union[MultipleObjectiveLoss, _Loss],
-                 matching_method: _MatchingMethod,
+                 matching_method: _Match,
                  bg_class_position: str = "first",
                  size_average=None,
                  reduce=None,
@@ -42,7 +42,7 @@ class DetectionLoss(_Loss):
         """
         super(DetectionLoss, self).__init__(size_average, reduce, reduction)
 
-        assert isinstance(matching_method, _MatchingMethod), "matching_method must be an instance of _MatchingMethod"
+        assert isinstance(matching_method, _Match), "matching_method must be an instance of _Match"
         assert bg_class_position in ["first", "last", "none"], \
             "bg_class_index must be 'first', 'last' or 'none'"
 

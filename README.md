@@ -20,6 +20,7 @@ During training, supervised object detection tries to correctly match the predic
 ## Examples
 
 OT matching with GIoU loss:
+
 ```python
 from uotod.match import OTMatching
 from uotod.loss.modules import GIoULoss
@@ -31,6 +32,7 @@ ot = OTMatching(
 ```
 
 Hungarian matching (bipartite) with GIoU loss:
+
 ```python
 from uotod.match import HungarianMatching
 from uotod.loss.modules import GIoULoss
