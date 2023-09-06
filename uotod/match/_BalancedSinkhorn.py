@@ -7,13 +7,13 @@ from abc import ABCMeta, abstractmethod
 import torch
 from torch import Tensor
 from torch.nn.modules.loss import _Loss
-
 from ._Match import _Match
+from ._Sinkhorn import _Sinkhorn
 from ..utils import extend_docstring, kwargs_decorator
 
 
-@extend_docstring(_Match)
-class _BalancedSinkhorn(_Match, metaclass=ABCMeta):
+@extend_docstring(_Sinkhorn)
+class _BalancedSinkhorn(_Sinkhorn, metaclass=ABCMeta):
     r"""
     :param ot_reg0: Adaptive regularization parameter for the OT algorithm. Defaults to 0.12.
     :param ot_reg: Regularization parameter for the OT algorithm. Defaults to None.
@@ -23,7 +23,7 @@ class _BalancedSinkhorn(_Match, metaclass=ABCMeta):
     @kwargs_decorator({'reg0': 0.12,
                        'reg': None})
     def __init__(self,**kwargs) -> None:
-        super().__init__(**kwargs)
+        super(_BalancedSinkhorn, self).__init__(**kwargs)
 
         self.reg = kwargs['reg']
         self.reg0 = kwargs['reg0']

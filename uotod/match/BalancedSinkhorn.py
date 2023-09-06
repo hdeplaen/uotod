@@ -8,11 +8,13 @@ from ..utils import extend_docstring
 
 @extend_docstring(_BalancedSinkhorn)
 @extend_docstring(_Compiled)
-class BalancedSinkhorn(_BalancedSinkhorn, _Compiled):
+class BalancedSinkhorn(_Compiled, _BalancedSinkhorn):
     _compiled_name = "base"
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(BalancedSinkhorn, self).__init__(**kwargs)
+        # super(_BalancedSinkhorn, self).__init__(**kwargs)
+        # super(_Compiled, self).__init__(**kwargs)
 
     def _matching(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float) -> Tensor:
         return self._matching_method(hist_pred, hist_tgt, C, reg, self._num_iter)

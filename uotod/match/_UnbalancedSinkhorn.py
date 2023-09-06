@@ -8,21 +8,19 @@ import torch
 from torch import Tensor
 from torch.nn.modules.loss import _Loss
 
-from ._Match import _Match
+from ._Sinkhorn import _Sinkhorn
 from ..utils import extend_docstring, kwargs_decorator
 
 
-@extend_docstring(_Match)
-class _UnbalancedSinkhorn(_Match, metaclass=ABCMeta):
+@extend_docstring(_Sinkhorn)
+class _UnbalancedSinkhorn(_Sinkhorn, metaclass=ABCMeta):
     r"""
-    :param ot_reg0: Adaptive regularization parameter for the OT algorithm. Defaults to 0.12.
     :param ot_reg: Regularization parameter for the OT algorithm. Defaults to None.
-    :type reg0: float, optional
     :type reg: float, optional
     """
     @kwargs_decorator({'reg': 0.1})
     def __init__(self,**kwargs) -> None:
-        super().__init__(**kwargs)
+        super(_UnbalancedSinkhorn, self).__init__(**kwargs)
 
         self.reg = kwargs['reg']
 
@@ -33,7 +31,7 @@ class _UnbalancedSinkhorn(_Match, metaclass=ABCMeta):
     def _matching(self, hist_pred: Tensor, hist_tgt: Tensor, C:Tensor) -> Tensor:
         pass
 
-    @extend_docstring(_Match.compute_matching)
+    @extend_docstring(_Sinkhorn.compute_matching)
     @torch.no_grad()
     def compute_matching(self, cost_matrix: Tensor, target_mask: Tensor) -> Tensor:
         r"""

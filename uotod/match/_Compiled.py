@@ -17,11 +17,8 @@ class _Compiled(metaclass=ABCMeta):
     @kwargs_decorator({'compiled': False,
                        'num_iter': 20})
     def __init__(self, **kwargs):
-        super().__init__()
-        assert isinstance(kwargs["compiled"], bool), \
-            TypeError("The compiled property must be set to a boolean.")
-        if kwargs["compiled"]: self._define_matching_method()
-        self._compiled = kwargs["compiled"]
+        super(_Compiled, self).__init__(**kwargs)
+        self.compiled = kwargs["compiled"]
         self.num_iter = kwargs["num_iter"]
 
     @property
@@ -33,7 +30,14 @@ class _Compiled(metaclass=ABCMeta):
 
     @compiled.setter
     def compiled(self, val: bool):
-        warn("The compiled property cannot be changed after initialization.")
+        assert isinstance(val, bool), \
+            TypeError("The compiled property must be set to a boolean.")
+        self._compiled = val
+        if self._compiled:
+            compiled_module = self._check_compilation()
+            self._matching_method = getattr(compiled_module, self._compiled_name)
+        else:
+            self._matching_method = self._matching_native
 
     @property
     def num_iter(self) -> int:
@@ -67,7 +71,7 @@ class _Compiled(metaclass=ABCMeta):
                 "The compilation failed. Please use the inline version by setting the property compiled to False.")
 
     @abstractmethod
-    def _matching_inline(self):
+    def _matching_native(self):
         pass
 
     @property
@@ -75,10 +79,4 @@ class _Compiled(metaclass=ABCMeta):
     def _compiled_name(self) -> str:
         pass
 
-    def _define_matching_method(self):
-        if self._compiled:
-            compiled_module = self._check_compilation()
-            self._matching_method = getattr(compiled_module, self._compiled_name)
-        else:
-            self._matching_method = self._matching_inline
 

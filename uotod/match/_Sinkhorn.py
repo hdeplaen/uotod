@@ -16,7 +16,7 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
     """
     @kwargs_decorator({'normalize_cost_matrix': True})
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(_Sinkhorn, self).__init__(**kwargs)
         assert isinstance(kwargs["normalize_cost_matrix"], bool), \
             TypeError("The argument normalize_cost_matrix must be a boolean.")
         self.normalize_cost_matrix = kwargs["normalize_cost_matrix"]

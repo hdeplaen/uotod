@@ -14,14 +14,15 @@ class _POT(metaclass=ABCMeta):
     @kwargs_decorator({'method': 'sinkhorn',
                        'balanced': True})
     def __init__(self, **kwargs) -> None:
-
+        super(_POT, self).__init__(**kwargs)
         ot_module = _POT._check_ot_installed()
-        self.method_kwargs = kwargs
+        self._method_kwargs = kwargs
         if kwargs['balanced']:
-            self.method = ot_module.bregman.sinkhorn
+            sub_module = ot_module.bregman
         else:
-            self.method = ot_module.unbalanced.sinkhorn_unbalanced
-        self.method_name = kwargs['method']
+            sub_module = ot_module.unbalanced
+        self._pot_method = getattr(sub_module, kwargs['method'])
+
 
     @staticmethod
     def _check_ot_installed():

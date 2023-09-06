@@ -6,10 +6,9 @@ torch::Tensor base(const torch::Tensor &h_s,
                    double reg,
                    int numIter) {
 
-    int N, num_s, num_t;
+    int N, num_s;
     N = C.size(0);
     num_s = C.size(1);
-    num_t = C.size(2);
     ::dev = C.device();
 
     torch::Tensor K = (C / -reg).exp();

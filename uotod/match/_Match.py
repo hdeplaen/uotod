@@ -29,19 +29,16 @@ class _Match(nn.Module, metaclass=ABCMeta):
                        'bg_cost': 10.0,
                        'is_anchor_based': False})
     def __init__(self, **kwargs) -> None:
-        super().__init__()
+        super(_Match, self).__init__()
 
         assert isinstance(kwargs['cls_matching_module'], _Loss) or isinstance(kwargs['loc_matching_module'], _Loss), \
-            "At least one of the classification and localization losses must be provided."
+            "At least a localization or classification cost must be provided."
         assert kwargs['bg_cost'] >= 0., "The background cost must a non-negative float."
         assert kwargs['bg_class_position'] in ["first", "last", "none"], \
             "bg_class_index must be 'first', 'last' or 'none'"
 
         self.matching_cls_module = kwargs['cls_matching_module']
         self.matching_loc_module = kwargs['loc_matching_module']
-
-        assert self.matching_cls_module is not None or self.matching_loc_module is not None, \
-            "At least a localization or classification cost must be provided, but both are None."
 
         self.bg_class_position = kwargs['bg_class_position']  # FIXME: this is not used; but do we need it?
         self.bg_cost = kwargs['bg_cost']
