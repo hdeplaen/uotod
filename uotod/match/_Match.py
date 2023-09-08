@@ -11,6 +11,7 @@ from torch.nn.modules.loss import _Loss
 from ..utils import convert_target_to_dict, kwargs_decorator
 from ..plot import image_with_boxes, match, cost
 
+
 class _Match(nn.Module, metaclass=ABCMeta):
     r"""
     :param cls_matching_module: Classification loss used to compute the matching, if any.
@@ -27,7 +28,8 @@ class _Match(nn.Module, metaclass=ABCMeta):
                        'loc_matching_module': None,
                        'bg_class_position': "first",
                        'bg_cost': 10.0,
-                       'is_anchor_based': False})
+                       'is_anchor_based': False,
+                       'individual': True})
     def __init__(self, **kwargs) -> None:
         super(_Match, self).__init__()
 
@@ -43,6 +45,8 @@ class _Match(nn.Module, metaclass=ABCMeta):
         self.bg_class_position = kwargs['bg_class_position']  # FIXME: this is not used; but do we need it?
         self.bg_cost = kwargs['bg_cost']
         self.is_anchor_based = kwargs['is_anchor_based']
+
+        self._individual = kwargs['individual']
 
     @torch.no_grad()
     def forward(self,
@@ -150,7 +154,8 @@ class _Match(nn.Module, metaclass=ABCMeta):
         cost_matrix = cost_matrix * target["mask"].unsqueeze(dim=1).expand(cost_matrix.shape)
 
         # Add the background cost.
-        if background: cost_matrix = torch.cat([cost_matrix, self.bg_cost * torch.ones_like(cost_matrix[:, :, :1])], dim=2)
+        if background: cost_matrix = torch.cat([cost_matrix, self.bg_cost * torch.ones_like(cost_matrix[:, :, :1])],
+                                               dim=2)
 
         return cost_matrix
 
@@ -210,7 +215,6 @@ class _Match(nn.Module, metaclass=ABCMeta):
 
         return loc_cost
 
-    @abstractmethod
     def compute_matching(self, cost_matrix: Tensor, target_mask: Tensor) -> Tensor:
         r"""
         Computes the matching.
@@ -220,7 +224,22 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :return: the matching. Tensor of shape (batch_size, num_pred, num_targets + 1). The last entry of the last
             dimension is the background.
         """
+        if self._individual:
+            sols = []
+            for idx in range(cost_matrix.size(0)):
+                sols.append(
+                    self._compute_matching_apart(cost_matrix[idx, :, :],
+                                                 target_mask[idx, :]).unsqueeze(0)
+                )
+            return torch.cat(sols, dim=0)
+        return self._compute_matching_together(cost_matrix, target_mask)
 
+    def _compute_matching_together(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
+        raise Exception('Parallelism is not possible for this matching. Please compute each match individually by '
+                        'not setting the argument individual to True during construction.')
+
+    @abstractmethod
+    def _compute_matching_apart(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
         pass
 
     def plot(self, idx=0, img: Optional[Union[Tensor, array]] = None,
@@ -247,70 +266,30 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :rtype: Tuple(fig, fig, fig)
         """
 
-        matching_matrix = self._last_match[idx,:,:]
-        pred_mask = matching_matrix[:,-1] <= max_background_match
-        target_mask = self._last_target["mask"][idx,:]
+        matching_matrix = self._last_match[idx, :, :]
+        pred_mask = matching_matrix[:, -1] <= max_background_match
+        target_mask = self._last_target["mask"][idx, :]
 
         # IMAGE WITH BOXES
         if img is not None:
             fig_img = image_with_boxes(img,
-                                       self._last_input["pred_boxes"][idx,:,:],
-                                       self._last_target["boxes"][idx,:,:],
+                                       self._last_input["pred_boxes"][idx, :, :],
+                                       self._last_target["boxes"][idx, :, :],
                                        pred_mask, target_mask)
-        else: fig_img = None
+        else:
+            fig_img = None
 
         # COST
         if plot_cost:
-            fig_cost = cost(self._last_cost[idx,:,:],
+            fig_cost = cost(self._last_cost[idx, :, :],
                             pred_mask, target_mask, background=background)
-        else: fig_cost = None
+        else:
+            fig_cost = None
 
         # MATCH
         if plot_match:
             fig_match = match(matching_matrix, pred_mask, target_mask, background=background)
-        else: fig_match = None
+        else:
+            fig_match = None
 
         return fig_img, fig_cost, fig_match
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

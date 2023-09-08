@@ -1,16 +1,12 @@
-from abc import ABCMeta, abstractmethod
-
 import torch
 from torch import Tensor
 
 from ._Compiled import _Compiled
-from ._UnbalancedSinkhorn import _UnbalancedSinkhorn
 from ..utils import extend_docstring, kwargs_decorator
 
 
 @extend_docstring(_Compiled)
-@extend_docstring(_UnbalancedSinkhorn)
-class UnbalancedSinkhorn(_Compiled, _UnbalancedSinkhorn):
+class UnbalancedSinkhorn(_Compiled):
     r"""
     :param reg_pred: Prediction constraint regularization parameter for the OT algorithm. Defaults to 1.0.
     :param reg_target: Ground truth constraint regularization parameter for the OT algorithm. Defaults to 1.0.
@@ -36,7 +32,7 @@ class UnbalancedSinkhorn(_Compiled, _UnbalancedSinkhorn):
         return self._matching_method(hist_pred, hist_ttarget, C, self.reg, self._num_iter, self.reg_target, self.reg_pred)
 
     @torch.no_grad()
-    def _matching_native(self, hist_pred: Tensor, hist_ttarget: Tensor, C:Tensor, reg:float, num_iter: int, reg_pred:float, reg_target: float) -> Tensor:
+    def _sinkhorn_python(self, hist_pred: Tensor, hist_ttarget: Tensor, C:Tensor, reg:float, num_iter: int, reg_pred:float, reg_target: float) -> Tensor:
         batch_size, num_pred, _ = C.shape
         factor1 = reg_pred / (reg_pred + reg) if reg_pred is not None else 1.
         factor2 = reg_target / (reg_target + reg) if reg_target is not None else 1.
@@ -54,3 +50,21 @@ class UnbalancedSinkhorn(_Compiled, _UnbalancedSinkhorn):
         P = torch.einsum("ni,nij,nj->nij", u, K, (hist_ttarget / (K * u.unsqueeze(2)).sum(dim=1)).pow(factor2))
 
         return P.data
+
+    def _compute_matching_together(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
+        return self._matching_method(kwargs['hist_pred'],
+                                     kwargs['hist_target'],
+                                     cost_matrix,
+                                     kwargs['reg'],
+                                     self.num_iter,
+                                     self.reg_pred,
+                                     self.reg_target)
+
+    def _compute_matching_apart(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
+        return self._matching_method(kwargs['hist_pred'].unsqueeze(0),
+                                     kwargs['hist_target'].unsqueeze(0),
+                                     cost_matrix.unsqueeze(0),
+                                     kwargs['reg'],
+                                     self.num_iter,
+                                     self.reg_pred,
+                                     self.reg_target)

@@ -1,28 +1,27 @@
 from abc import ABCMeta, abstractmethod
-
+from torch import Tensor
 
 import sys
 import importlib.util
 
+from ._Match import _Match
 from ..utils import kwargs_decorator
 
-
-class _POT(metaclass=ABCMeta):
+class _POT(_Match, metaclass=ABCMeta):
     r"""
     Makes you able to use special methods from the Python Optimal Transport Toolbox (not installed by default).
     """
     @kwargs_decorator({'method': 'sinkhorn',
-                       'balanced': True})
+                       'balanced': True,
+                       'individual': True})
     def __init__(self, **kwargs) -> None:
         super(_POT, self).__init__(**kwargs)
         ot_module = _POT._check_ot_installed()
         self._method_kwargs = kwargs
         if kwargs['balanced']:
-            sub_module = ot_module.bregman
+            self._pot_method = ot_module.bregman.sinkhorn
         else:
-            sub_module = ot_module.unbalanced
-        self._pot_method = getattr(sub_module, kwargs['method'])
-
+            self._pot_method = ot_module.unbalanced.sinkhorn_unbalanced
 
     @staticmethod
     def _check_ot_installed():
@@ -46,3 +45,5 @@ class _POT(metaclass=ABCMeta):
                     >> pip install pot
                 (or via another way).
                 """)
+
+    def _compute_matching_together(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:

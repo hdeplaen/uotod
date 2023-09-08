@@ -22,3 +22,4 @@ Different Strategies
     :maxdepth: 1
 
     hungarian
+    balanced

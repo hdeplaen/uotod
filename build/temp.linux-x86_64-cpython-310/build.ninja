@@ -1,0 +1,25 @@
+ninja_required_version = 1.3
+cxx = c++
+
+cflags = -pthread -B /users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/compiler_compat -Wno-unused-result -Wsign-compare -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/include -fPIC -O2 -isystem /users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/include -fPIC -I/users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/lib/python3.10/site-packages/torch/include -I/users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/lib/python3.10/site-packages/torch/include/torch/csrc/api/include -I/users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/lib/python3.10/site-packages/torch/include/TH -I/users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/lib/python3.10/site-packages/torch/include/THC -I/users/sista/hdeplaen/Volume/System/Anaconda/envs/uotod/include/python3.10 -c
+post_cflags = -O3 -w -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"' -DTORCH_EXTENSION_NAME=compiled -D_GLIBCXX_USE_CXX11_ABI=1 -std=c++17
+cuda_dlink_post_cflags = 
+ldflags = 
+
+rule compile
+  command = $cxx -MMD -MF $out.d $cflags -c $in -o $out $post_cflags
+  depfile = $out.d
+  deps = gcc
+
+
+
+
+
+build /volume1/scratch/hdeplaen/UOTOD/uotod/build/temp.linux-x86_64-cpython-310/src/sinkhorn.o: compile /volume1/scratch/hdeplaen/UOTOD/uotod/src/sinkhorn.cpp
+
+
+
+
+
+
+

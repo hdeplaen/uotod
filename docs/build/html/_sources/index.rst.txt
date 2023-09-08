@@ -9,6 +9,8 @@ Unbalanced Optimal Transport for Object Detection
     :glob:
 
     match/index
+    references
+    acknowledgements
 
 Indices and tables
 ==================

@@ -1,7 +1,10 @@
-from matplotlib import image as mpimg
+import numpy
+from PIL import Image
 import torch
 
-img = mpimg.imread('img.jpg')
+with Image.open('img.jpg') as pil_img:
+    img = numpy.asarray(pil_img)
+
 
 boxes_pred = torch.Tensor([[25, 12, 242, 215],      # 1
                            [362, 126, 469, 425],    # 2
@@ -10,7 +13,7 @@ boxes_pred = torch.Tensor([[25, 12, 242, 215],      # 1
                            [287, 76, 439, 388]])    # 5
 
 boxes_target = torch.Tensor([[52, 22, 308, 328],    # A
-                         [26, 106, 456, 394]])      # B
+                            [26, 106, 456, 394]])   # B
 
 mask_pred = torch.BoolTensor([False, True, True, False, True])
 mask_target = torch.BoolTensor([True, True])

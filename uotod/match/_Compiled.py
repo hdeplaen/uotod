@@ -2,11 +2,13 @@ from warnings import warn
 from abc import ABCMeta, abstractmethod
 import sys
 import importlib.util
+from torch import Tensor
 
-from ..utils import kwargs_decorator
+from ._Sinkhorn import _Sinkhorn
+from ..utils import kwargs_decorator, extend_docstring
 
-
-class _Compiled(metaclass=ABCMeta):
+@extend_docstring(_Sinkhorn)
+class _Compiled(_Sinkhorn, metaclass=ABCMeta):
     r"""
     :param compiled: Indicates whether to use a compiled version of the algorithm or not. Defaults to False.
     :param num_iter: Fixed number of iterations in Sinkhorn's algorithm. Defaults to 20.
@@ -37,7 +39,7 @@ class _Compiled(metaclass=ABCMeta):
             compiled_module = self._check_compilation()
             self._matching_method = getattr(compiled_module, self._compiled_name)
         else:
-            self._matching_method = self._matching_native
+            self._matching_method = self._sinkhorn_python
 
     @property
     def num_iter(self) -> int:
@@ -71,12 +73,15 @@ class _Compiled(metaclass=ABCMeta):
                 "The compilation failed. Please use the inline version by setting the property compiled to False.")
 
     @abstractmethod
-    def _matching_native(self):
+    def _sinkhorn_python(self):
         pass
 
     @property
     @abstractmethod
     def _compiled_name(self) -> str:
         pass
+
+
+
 
 

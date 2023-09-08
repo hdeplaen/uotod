@@ -1,14 +1,12 @@
 import torch
 from torch import Tensor
 
-from ._BalancedSinkhorn import _BalancedSinkhorn
 from ._Compiled import _Compiled
 from ..utils import extend_docstring
 
 
-@extend_docstring(_BalancedSinkhorn)
 @extend_docstring(_Compiled)
-class BalancedSinkhorn(_Compiled, _BalancedSinkhorn):
+class BalancedSinkhorn(_Compiled):
     _compiled_name = "base"
 
     def __init__(self, **kwargs):
@@ -19,7 +17,7 @@ class BalancedSinkhorn(_Compiled, _BalancedSinkhorn):
     def _matching(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float) -> Tensor:
         return self._matching_method(hist_pred, hist_tgt, C, reg, self._num_iter)
 
-    def _matching_native(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float, num_iter: int) -> Tensor:
+    def _sinkhorn_python(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float, num_iter: int) -> Tensor:
         batch_size, num_pred, _ = C.shape
 
         # Initialization of the algorithm
@@ -34,3 +32,17 @@ class BalancedSinkhorn(_Compiled, _BalancedSinkhorn):
         P = torch.einsum("ni,nij,nj->nij", u, K, hist_tgt / (K * u.unsqueeze(2)).sum(dim=1))
 
         return P.data
+
+    def _compute_matching_together(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
+        return self._matching_method(kwargs['hist_pred'],
+                                     kwargs['hist_target'],
+                                     C=cost_matrix,
+                                     reg=kwargs['reg'],
+                                     num_iter=self.num_iter)
+
+    def _compute_matching_apart(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
+        return self._matching_method(kwargs['hist_pred'].unsqueeze(0),
+                                     kwargs['hist_target'].unsqueeze(0),
+                                     C=cost_matrix.unsqueeze(0),
+                                     reg=kwargs['reg'],
+                                     num_iter=self.num_iter)

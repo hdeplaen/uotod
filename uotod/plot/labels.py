@@ -36,7 +36,7 @@ def prediction_colors(num, mask: Optional[BoolTensor] = None):
 def _labels(num, type: str, mask: Optional[BoolTensor] = None):
     if type == 'numbers':
         if mask is None:
-            yield from range(1, num)
+            yield from range(1, num+1)
         else:
             for i in range(num):
                 if mask[i]: yield i+1
