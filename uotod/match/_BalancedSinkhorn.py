@@ -22,7 +22,7 @@ class _BalancedSinkhorn(_Sinkhorn, metaclass=ABCMeta):
     """
     @kwargs_decorator({'reg0': 0.12,
                        'reg': None})
-    def __init__(self,**kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         super(_BalancedSinkhorn, self).__init__(**kwargs)
 
         self.reg = kwargs['reg']

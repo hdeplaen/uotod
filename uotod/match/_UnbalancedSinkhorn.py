@@ -19,7 +19,7 @@ class _UnbalancedSinkhorn(_Sinkhorn, metaclass=ABCMeta):
     :type reg: float, optional
     """
     @kwargs_decorator({'reg': 0.1})
-    def __init__(self,**kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         super(_UnbalancedSinkhorn, self).__init__(**kwargs)
 
         self.reg = kwargs['reg']

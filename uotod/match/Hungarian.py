@@ -8,6 +8,7 @@ from scipy.optimize import linear_sum_assignment
 from ._Match import _Match
 from ..utils import extend_docstring
 
+
 @extend_docstring(_Match)
 class Hungarian(_Match):
     r"""
