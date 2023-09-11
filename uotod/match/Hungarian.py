@@ -9,6 +9,7 @@ from ._Match import _Match
 from ..utils import extend_docstring, kwargs_decorator
 
 
+
 @extend_docstring(_Match)
 class Hungarian(_Match):
     r"""
