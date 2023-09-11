@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="References" href="../references.html" />
-    <link rel="prev" title="Hungarian Matching" href="hungarian.html" /> 
+    <link rel="next" title="Unbalanced Sinkhorn" href="unbalanced.html" />
+    <link rel="prev" title="Hungarian" href="hungarian.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,12 +51,15 @@
 <li class="toctree-l2"><a class="reference internal" href="index.html#examples">Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#live-demo">Live Demo</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#different-strategies">Different Strategies</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="hungarian.html">Hungarian Matching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hungarian.html">Hungarian</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Balanced Sinkhorn</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#class">Class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="unbalanced.html">Unbalanced Sinkhorn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="balanced_pot.html">Balanced Sinkhorn from the Python Optimal Transport Library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="unbalanced_pot.html">Unbalanced Sinkhorn from the Python Optimal Transport Library</a></li>
 </ul>
 </li>
 </ul>
@@ -92,12 +95,28 @@
              
   <section id="balanced-sinkhorn">
 <h1>Balanced Sinkhorn<a class="headerlink" href="#balanced-sinkhorn" title="Link to this heading"></a></h1>
+<p>We consider the matching cost <span class="math notranslate nohighlight">\(\mathcal{L}_{\text{match}}\)</span> = <strong>cls_match_cost</strong> + <strong>loc_match_cost</strong>
+between the <span class="math notranslate nohighlight">\(N_p\)</span> predictions <span class="math notranslate nohighlight">\(\hat{\mathbf{y}}_i\)</span> and <span class="math notranslate nohighlight">\(N_t\)</span> targets <span class="math notranslate nohighlight">\(\mathbf{y}_j\)</span>. In particular, the cost of the background <span class="math notranslate nohighlight">\(\mathbf{y}_{N_t+1} = \varnothing\)</span> is given by
+<span class="math notranslate nohighlight">\(\mathcal{L}_{\text{match}}\left(\hat{\mathbf{y}}_i, \varnothing\right)\)</span> = <strong>bg_cost</strong>.
+The match is given by</p>
 <div class="math notranslate nohighlight">
-\[\hat{\mathbf{P}} = \underset{\mathbf{P}\, \in\, \mathcal{U}(\mathbf{\alpha},\mathbf{\beta})}{\mathrm{arg\,min}} \left\{\sum_{i,j=1}^{N_p,N_g} P_{i,j}\mathcal{L}_{\text{match}}\left(\hat{\mathbf{y}}_i, \mathbf{y}_j\right) - \mathtt{reg} * \,\mathrm{H}(\mathbf{P}) \right\},\]</div>
+\begin{align}
+N_p * \mathrm{arg\,min} &amp;\sum_{i,j=1}^{N_p,N_t+1} P_{i,j}\mathcal{L}_{\text{match}}\left(\hat{\mathbf{y}}_i, \mathbf{y}_j\right) - \mathtt{reg} * \,\mathrm{H}(\mathbf{P}), &amp;\\
+\mathrm{s.t.} &amp; \sum_{j=1}^{N_t+1} P_{i,j} = 1/N_p, &amp; \forall\; 0 \leq i \leq N_p \;\text{(predictions)},\\
+&amp; \sum_{i=1}^{N_p} P_{i,j} = 1/N_p, &amp; \forall\; 0 \leq j \leq N_t \;\text{(targets)},\\
+&amp; \sum_{i=1}^{N_p} P_{i,j} = (N_p - N_t)/N_p, &amp; j = N_t+1\;\text{(background)}.
+\end{align}</div><p>with <span class="math notranslate nohighlight">\(\mathrm{H}: \Delta^{N \times M} \rightarrow \mathbb{R}_{\geq 0} : \mathbf{P} \mapsto -\sum_{i,j} P_{i,j}(\log(P_{i,j})-1)\)</span> the entropy of the match <span class="math notranslate nohighlight">\(\mathbf{P}\)</span>, with <span class="math notranslate nohighlight">\(0 \ln(0) = 0\)</span> by definition.</p>
+<p>In the particular case where no background is used, the problem remains the same but the last column of <span class="math notranslate nohighlight">\(\mathbf{P}\)</span> is just unnused.</p>
+<p>In the limit of <cite>reg</cite> (or <cite>reg_dimless</cite>) to 0, this becomes the Hungarian algorithm. We refer to Proposition 1 of <span id="id1">[<a class="reference internal" href="../references.html#id77" title="Henri De Plaen, Pierre-François De Plaen, Johan A. K. Suykens, Marc Proesmans, Tinne Tuytelaars, and Luc Van Gool. Unbalanced optimal transport: a unified framework for object detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 3198-3207. June 2023.">DPDPS+23</a>]</span> for further information. By consequence, this matching can be seen as a regularized version of the Hungarian one.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>If the formulation converges to the Hungarian algorithm in the limit of <cite>reg</cite> to 0, it becomes more and more unstable if solved using Sinkhorn’s algorithm.</p>
+<p>If the formulation converges to the Hungarian algorithm in the limit of <cite>reg</cite> (or <cite>reg_dimless</cite>) to 0, it becomes more and more unstable if solved using Sinkhorn’s algorithm.</p>
 </div>
+<p>Sinkhorn’s algorithm is used to solve the problem.
+It is however not run until convergence, but with a fixed number of iterations.
+A compiled version is also available through the boolean <cite>compiled</cite>.
+The fixed number of iterations (and the non-verification of convergence) has the advantage of boosting the computation time and taking a vast advantage of the Tensor parallelization capabilities of modern GPUs.
+If a more stable or defensive, but also slower implementation is required, we refer to the <a class="reference internal" href="balanced_pot.html#uotod.match.BalancedPOT" title="uotod.match.BalancedPOT"><code class="xref py py-class docutils literal notranslate"><span class="pre">uotod.match.BalancedPOT</span></code></a> class.</p>
 <section id="class">
 <h2>Class<a class="headerlink" href="#class" title="Link to this heading"></a></h2>
 <dl class="py class">
@@ -109,12 +128,12 @@
 <li><p><strong>compiled</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates whether to use a compiled version of the algorithm or not. Defaults to False.</p></li>
 <li><p><strong>num_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – Fixed number of iterations in Sinkhorn’s algorithm. Defaults to 20.</p></li>
 <li><p><strong>normalize_cost_matrix</strong> (<em>bool</em><em>, </em><em>optional</em>) – Normalizes the cost matrix, defaults to True.</p></li>
-<li><p><strong>reg0</strong> (<em>float</em><em>, </em><em>optional</em>) – Adaptive regularization parameter for the OT algorithm. Defaults to 0.12. This argument automatically sets the regularization depending on the problem size if the latter is not set. We refer to <span id="id1">[<a class="reference internal" href="../references.html#id77" title="Henri De Plaen, Pierre-François De Plaen, Johan A. K. Suykens, Marc Proesmans, Tinne Tuytelaars, and Luc Van Gool. Unbalanced optimal transport: a unified framework for object detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 3198-3207. June 2023.">DPDPS+23</a>]</span> for more information.</p></li>
-<li><p><strong>reg</strong> (<em>float</em><em>, </em><em>optional</em>) – Regularization parameter for the OT algorithm. Defaults to None. It is dependent of the problem size and we recommend leaving it blank and using the argument <cite>reg0</cite> instead.</p></li>
-<li><p><strong>cls_matching_module</strong> – Classification loss used to compute the matching, if any.</p></li>
-<li><p><strong>loc_matching_module</strong> – Localization loss used to compute the matching, if any.</p></li>
+<li><p><strong>reg_dimless</strong> (<em>float</em><em>, </em><em>optional</em>) – Dimensionless regularization parameter for the OT algorithm. Defaults to 0.12. This argument automatically sets the regularization <cite>reg</cite> depending on the problem size if the latter is not set. We refer to <span id="id2">[<a class="reference internal" href="../references.html#id77" title="Henri De Plaen, Pierre-François De Plaen, Johan A. K. Suykens, Marc Proesmans, Tinne Tuytelaars, and Luc Van Gool. Unbalanced optimal transport: a unified framework for object detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 3198-3207. June 2023.">DPDPS+23</a>]</span> for more information.</p></li>
+<li><p><strong>reg</strong> (<em>float</em><em>, </em><em>optional</em>) – Regularization parameter for the OT algorithm. Defaults to None. It is dependent of the problem size and we recommend leaving it blank and using the argument <cite>reg_dimless</cite> instead.</p></li>
+<li><p><strong>cls_match_cost</strong> – Classification loss used to compute the matching, if any.</p></li>
+<li><p><strong>loc_match_cost</strong> – Localization loss used to compute the matching, if any.</p></li>
 <li><p><strong>bg_class_position</strong> (<em>str</em><em>, </em><em>optional</em>) – Index of the background class. “first”, “last” or “none” (no background class).</p></li>
-<li><p><strong>bg_cost</strong> (<em>float</em><em>, </em><em>optional</em>) – Cost of the background class.</p></li>
+<li><p><strong>bg_cost</strong> (<em>float</em><em>, </em><em>optional</em>) – Cost of the background class. Defaults to 10.</p></li>
 <li><p><strong>is_anchor_based</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the matching is performed between the anchor boxes and the target boxes.</p></li>
 </ul>
 </dd>
@@ -248,29 +267,29 @@ The predictions are only plotted if the value matched to the background does not
 <span class="kn">from</span> <span class="nn">sample</span> <span class="kn">import</span> <span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">img</span>
 
 <span class="n">L</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">loss</span><span class="o">.</span><span class="n">GIoULoss</span><span class="p">()</span>
-<span class="n">H</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_matching_module</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
 <span class="n">H</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
 <span class="n">fig_img</span><span class="p">,</span> <span class="n">fig_cost</span><span class="p">,</span> <span class="n">fig_match</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">img</span><span class="o">=</span><span class="n">img</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/541a795838bce4a5655f4d165587a2d6/balanced.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
-<figure class="align-default" id="id2">
+<figure class="align-default" id="id3">
 <img alt="../_images/balanced_00.png" class="plot-directive" src="../_images/balanced_00.png" />
 <figcaption>
-<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/65a0f5846e47f5ea6ef1670f472f4882/balanced_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/68674d34eaff3950d2049138758b13ae/balanced_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/75a665a19d5a9f0edfb78ae4fffea1c5/balanced_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<figure class="align-default" id="id3">
-<img alt="../_images/balanced_01.png" class="plot-directive" src="../_images/balanced_01.png" />
-<figcaption>
-<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/08f70701c861bc2846b41094dd3ef312/balanced_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/ec4cce14fc2a807b87e38c749e746295/balanced_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/d310becd48b74888368e6a1676960264/balanced_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/65a0f5846e47f5ea6ef1670f472f4882/balanced_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/68674d34eaff3950d2049138758b13ae/balanced_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/75a665a19d5a9f0edfb78ae4fffea1c5/balanced_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <figure class="align-default" id="id4">
+<img alt="../_images/balanced_01.png" class="plot-directive" src="../_images/balanced_01.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/08f70701c861bc2846b41094dd3ef312/balanced_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/ec4cce14fc2a807b87e38c749e746295/balanced_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/d310becd48b74888368e6a1676960264/balanced_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id5">
 <img alt="../_images/balanced_02.png" class="plot-directive" src="../_images/balanced_02.png" />
 <figcaption>
-<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/5c84ece79c410a7ecd492a434a2227ba/balanced_02.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/08fcdac4bdf30edfe266af45587f9ee5/balanced_02.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/949296d9b8280d06c69feb7c11f855af/balanced_02.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/5c84ece79c410a7ecd492a434a2227ba/balanced_02.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/08fcdac4bdf30edfe266af45587f9ee5/balanced_02.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/949296d9b8280d06c69feb7c11f855af/balanced_02.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p>This is in essence a regularized version of the Hungarian algorithm.</p>
@@ -279,9 +298,9 @@ The predictions are only plotted if the value matched to the background does not
 
 <span class="n">L</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">loss</span><span class="o">.</span><span class="n">GIoULoss</span><span class="p">()</span>
 
-<span class="n">H_hungarian</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">Hungarian</span><span class="p">(</span><span class="n">loc_matching_module</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-<span class="n">H_balanced_small_reg</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_matching_module</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-<span class="n">H_balanced_big_reg</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_matching_module</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">H_hungarian</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">Hungarian</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">H_balanced_small_reg</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">H_balanced_big_reg</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 
 <span class="n">match_hungarian</span> <span class="o">=</span> <span class="n">H_hungarian</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
 <span class="n">match_balanced_small_reg</span> <span class="o">=</span> <span class="n">H_balanced_small_reg</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
@@ -293,22 +312,22 @@ The predictions are only plotted if the value matched to the background does not
 </pre></div>
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/350248f75c9e44abf79bbd94ba2eed76/balanced_vs_hungarian.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
-<figure class="align-default" id="id5">
+<figure class="align-default" id="id6">
 <img alt="../_images/balanced_vs_hungarian_00.png" class="plot-directive" src="../_images/balanced_vs_hungarian_00.png" />
 <figcaption>
-<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/1a4145581f577735c0663068a54f07ce/balanced_vs_hungarian_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/4c8294ec8ff44ff71bc0f4cad79f5313/balanced_vs_hungarian_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/9058e556ec67f66aea4a15ff9433867d/balanced_vs_hungarian_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<figure class="align-default" id="id6">
-<img alt="../_images/balanced_vs_hungarian_01.png" class="plot-directive" src="../_images/balanced_vs_hungarian_01.png" />
-<figcaption>
-<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/80c7a9c8a3550313adf8c80237f72b10/balanced_vs_hungarian_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/a33290a0fdf4bb15a605c5c66d3fda1a/balanced_vs_hungarian_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/e2df62f62c8250c470a8b6e4b8fb3dad/balanced_vs_hungarian_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/1a4145581f577735c0663068a54f07ce/balanced_vs_hungarian_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/4c8294ec8ff44ff71bc0f4cad79f5313/balanced_vs_hungarian_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/9058e556ec67f66aea4a15ff9433867d/balanced_vs_hungarian_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <figure class="align-default" id="id7">
+<img alt="../_images/balanced_vs_hungarian_01.png" class="plot-directive" src="../_images/balanced_vs_hungarian_01.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/80c7a9c8a3550313adf8c80237f72b10/balanced_vs_hungarian_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/a33290a0fdf4bb15a605c5c66d3fda1a/balanced_vs_hungarian_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/e2df62f62c8250c470a8b6e4b8fb3dad/balanced_vs_hungarian_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id8">
 <img alt="../_images/balanced_vs_hungarian_02.png" class="plot-directive" src="../_images/balanced_vs_hungarian_02.png" />
 <figcaption>
-<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/4c95bea4353f26f14fb2e4155cb20a9b/balanced_vs_hungarian_02.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/4834a02a43c7fef4c625ecc338ef68c2/balanced_vs_hungarian_02.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/666790470d435f2d26a826c438428375/balanced_vs_hungarian_02.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/4c95bea4353f26f14fb2e4155cb20a9b/balanced_vs_hungarian_02.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/4834a02a43c7fef4c625ecc338ef68c2/balanced_vs_hungarian_02.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/666790470d435f2d26a826c438428375/balanced_vs_hungarian_02.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -318,8 +337,8 @@ The predictions are only plotted if the value matched to the background does not
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="hungarian.html" class="btn btn-neutral float-left" title="Hungarian Matching" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../references.html" class="btn btn-neutral float-right" title="References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hungarian.html" class="btn btn-neutral float-left" title="Hungarian" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="unbalanced.html" class="btn btn-neutral float-right" title="Unbalanced Sinkhorn" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

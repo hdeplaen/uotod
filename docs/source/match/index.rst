@@ -23,3 +23,6 @@ Different Strategies
 
     hungarian
     balanced
+    unbalanced
+    balanced_pot
+    unbalanced_pot

@@ -47,3 +47,4 @@ class _POT(_Match, metaclass=ABCMeta):
                 """)
 
     def _compute_matching_together(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
+        pass

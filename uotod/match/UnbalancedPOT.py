@@ -2,10 +2,18 @@ import torch
 from torch import Tensor
 
 from ._POT import _POT
-from ._UnbalancedSinkhorn import _UnbalancedSinkhorn
-from ..utils import kwargs_decorator
+from ._Sinkhorn import _Sinkhorn
+from ..utils import kwargs_decorator, extend_docstring
 
-class UnbalancedPOT(_POT, _UnbalancedSinkhorn):
+@extend_docstring(_Sinkhorn)
+class UnbalancedPOT(_POT, _Sinkhorn):
+    r"""
+    :param method:
+    :type method:
+    :param reg_pred_target: Defaults to 1.
+    :type reg_pred_target: float, optional
+    """
+
     available_methods = ['sinkhorn',
                          'sinkhorn_stabilized',
                          'sinkhorn_reg_scaling']

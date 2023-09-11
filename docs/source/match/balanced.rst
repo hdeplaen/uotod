@@ -2,11 +2,13 @@
 Balanced Sinkhorn
 =================
 
-.. math::
-    \hat{\mathbf{P}} = \underset{\mathbf{P}\, \in\, \mathcal{U}(\mathbf{\alpha},\mathbf{\beta})}{\mathrm{arg\,min}} \left\{\sum_{i,j=1}^{N_p,N_g} P_{i,j}\mathcal{L}_{\text{match}}\left(\hat{\mathbf{y}}_i, \mathbf{y}_j\right) - \mathtt{reg} * \,\mathrm{H}(\mathbf{P}) \right\},
+.. include:: _balanced.rst
 
-.. warning::
-    If the formulation converges to the Hungarian algorithm in the limit of `reg` to 0, it becomes more and more unstable if solved using Sinkhorn's algorithm.
+Sinkhorn's algorithm is used to solve the problem.
+It is however not run until convergence, but with a fixed number of iterations.
+A compiled version is also available through the boolean `compiled`.
+The fixed number of iterations (and the non-verification of convergence) has the advantage of boosting the computation time and taking a vast advantage of the Tensor parallelization capabilities of modern GPUs.
+If a more stable or defensive, but also slower implementation is required, we refer to the :class:`uotod.match.BalancedPOT` class.
 
 Class
 =====

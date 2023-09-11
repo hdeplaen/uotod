@@ -13,34 +13,34 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
     r"""
     :param normalize_cost_matrix: Normalizes the cost matrix, defaults to True.
     :type normalize_cost_matrix: bool, optional
-    :param reg0: Adaptive regularization parameter for the OT algorithm. Defaults to 0.12. This argument automatically sets the regularization depending on the problem size if the latter is not set. We refer to :cite:`De_Plaen_2023_CVPR` for more information.
-    :param reg: Regularization parameter for the OT algorithm. Defaults to None. It is dependent of the problem size and we recommend leaving it blank and using the argument `reg0` instead.
-    :type reg0: float, optional
+    :param reg_dimless: Dimensionless regularization parameter for the OT algorithm. Defaults to 0.12. This argument automatically sets the regularization `reg` depending on the problem size if the latter is not set. We refer to :cite:`De_Plaen_2023_CVPR` for more information.
+    :param reg: Regularization parameter for the OT algorithm. Defaults to None. It is dependent of the problem size and we recommend leaving it blank and using the argument `reg_dimless` instead.
+    :type reg_dimless: float, optional
     :type reg: float, optional
     """
     @kwargs_decorator({'normalize_cost_matrix': True,
                        'individual': False,
-                       'reg0': 0.12,
+                       'reg_dimless': 0.12,
                        'reg': None})
     def __init__(self, **kwargs):
         super(_Sinkhorn, self).__init__(**kwargs)
         self.reg = kwargs['reg']
-        self.reg0 = kwargs['reg0']
+        self.reg_dimless = kwargs['reg_dimless']
 
         assert self.reg is None or isinstance(self.reg, float), \
             TypeError("The parameter reg must be a float or None.")
-        assert self.reg0 is None or isinstance(self.reg0, float), \
-            TypeError("The parameter reg0 must be a float or None.")
+        assert self.reg_dimless is None or isinstance(self.reg_dimless, float), \
+            TypeError("The parameter reg_dimless must be a float or None.")
 
         assert isinstance(kwargs["normalize_cost_matrix"], bool), \
             TypeError("The argument normalize_cost_matrix must be a boolean.")
         self.normalize_cost_matrix = kwargs["normalize_cost_matrix"]
 
         if self.reg is not None:
-            self.reg0 = None
+            self.reg_dimless = None
             assert self.reg > 0., "The regularization parameter must be positive."
         else:
-            assert self.reg0 is not None and self.reg0 > 0., "The adaptive regularization parameter must be positive."
+            assert self.reg_dimless is not None and self.reg_dimless > 0., "The adaptive regularization parameter must be positive."
 
     @torch.no_grad()
     def _get_histograms(self, cost_matrix: Tensor, target_mask: Tensor) -> Tuple[Tensor, Tensor]:
@@ -83,9 +83,9 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
             C = cost_matrix
 
         # Compute the regularization parameter
-        if self.reg0 is not None:
+        if self.reg_dimless is not None:
             num_pred = cost_matrix.shape[1]
-            reg = self.reg0 / (math.log(num_pred * 2.) + 1.)
+            reg = self.reg_dimless / (math.log(num_pred * 2.) + 1.)
         else:
             reg = self.reg
 

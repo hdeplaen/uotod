@@ -14,18 +14,18 @@ from ..plot import image_with_boxes, match, cost
 
 class _Match(nn.Module, metaclass=ABCMeta):
     r"""
-    :param cls_matching_module: Classification loss used to compute the matching, if any.
-    :param loc_matching_module: Localization loss used to compute the matching, if any.
+    :param cls_match_cost: Classification loss used to compute the matching, if any.
+    :param loc_match_cost: Localization loss used to compute the matching, if any.
     :param bg_class_position: Index of the background class. "first", "last" or "none" (no background class).
-    :param bg_cost: Cost of the background class.
+    :param bg_cost: Cost of the background class. Defaults to 10.
     :param is_anchor_based: If True, the matching is performed between the anchor boxes and the target boxes.
     :type bg_class_position: str, optional
     :type bg_cost: float, optional
     :type is_anchor_based: bool, optional
     """
 
-    @kwargs_decorator({'cls_matching_module': None,
-                       'loc_matching_module': None,
+    @kwargs_decorator({'cls_match_cost': None,
+                       'loc_match_cost': None,
                        'bg_class_position': "first",
                        'bg_cost': 10.0,
                        'is_anchor_based': False,
@@ -33,14 +33,14 @@ class _Match(nn.Module, metaclass=ABCMeta):
     def __init__(self, **kwargs) -> None:
         super(_Match, self).__init__()
 
-        assert isinstance(kwargs['cls_matching_module'], _Loss) or isinstance(kwargs['loc_matching_module'], _Loss), \
+        assert isinstance(kwargs['cls_match_cost'], _Loss) or isinstance(kwargs['loc_match_cost'], _Loss), \
             "At least a localization or classification cost must be provided."
         assert kwargs['bg_cost'] >= 0., "The background cost must a non-negative float."
         assert kwargs['bg_class_position'] in ["first", "last", "none"], \
             "bg_class_index must be 'first', 'last' or 'none'"
 
-        self.matching_cls_module = kwargs['cls_matching_module']
-        self.matching_loc_module = kwargs['loc_matching_module']
+        self.matching_cls_module = kwargs['cls_match_cost']
+        self.matching_loc_module = kwargs['loc_match_cost']
 
         self.bg_class_position = kwargs['bg_class_position']  # FIXME: this is not used; but do we need it?
         self.bg_cost = kwargs['bg_cost']

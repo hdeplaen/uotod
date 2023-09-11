@@ -2,11 +2,11 @@ import torch
 from torch import Tensor
 
 from ._POT import _POT
-from ._BalancedSinkhorn import _BalancedSinkhorn
+from ._Sinkhorn import _Sinkhorn
 from ..utils import kwargs_decorator, extend_docstring
 
 
-class BalancedPOT(_POT, _BalancedSinkhorn):
+class BalancedPOT(_POT, _Sinkhorn):
     available_methods = ['sinkhorn',
                          'greenkorn',
                          'sinkhorn_log',

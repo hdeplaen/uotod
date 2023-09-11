@@ -5,7 +5,7 @@ Unbalanced Optimal Transport for Object Detection
 .. include:: install.rst
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
     :glob:
 
     match/index
