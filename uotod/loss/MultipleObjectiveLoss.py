@@ -7,13 +7,13 @@ import torch.nn.modules.loss as _Loss
 
 
 # FIXME: list to *iter ?
-# class MultipleObjectiveLoss(torch.nn.Module):
-class MultipleObjectiveLoss(_Loss):
+# class MultipleObjectiveLoss(_Loss):  # FIXME: use _Loss instead iof module
+class MultipleObjectiveLoss(torch.nn.Module):
     r"""
     Weighted sum of losses.
     """
 
-    def __init__(self, losses: List[_Loss] = tuple(), coefficients: List[float] = tuple()):
+    def __init__(self, losses: List = [], coefficients: List[float] = []):
         """
         :param losses: list of losses (with no reduction)
         :param coefficients: list of coefficients for the losses
@@ -37,16 +37,6 @@ class MultipleObjectiveLoss(_Loss):
 
         self.losses = losses
         self.coefficients = coefficients
-
-    def add_loss(self, loss: _Loss, weight: float) -> None:
-        """
-        :param loss: loss to add
-        :param weight: weight of the loss
-        """
-        assert loss.reduction == "none", "The reduction of the loss must be none."
-
-        self.losses.append(loss)
-        self.coefficients.append(weight)
 
     def __repr__(self):
         return f"WeightedSumLoss(losses={self.losses}, weights={self.coefficients})"

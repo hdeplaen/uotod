@@ -65,13 +65,16 @@ class DetectionLoss(_Loss):
             "boxes": Tensor of shape (batch_size, num_targets, 4), where the last dimension is (x1, y1, x2, y2).
             "mask": Tensor of shape (batch_size, num_targets).
         :param anchors: the anchors used to compute the predicted boxes.
-            Tensor of shape (batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).
+            Tensor of shape (batch_size, num_pred, 4) or (num_pred, 4), where the last dimension is (x1, y1, x2, y2).
         :return: the matching between the predicted and target boxes:
             Tensor of shape (batch_size, num_pred, num_targets).
         """
         # Convert the target to dict of masked tensors if necessary.
         if not isinstance(target, dict):
             target = convert_target_to_dict(target)
+
+        if anchors.dim() == 2:
+            anchors = anchors.unsqueeze(0).repeat(target['boxes'].shape[0], 1, 1)
 
         # Compute the matching.
         matching = self.matching_method(input, target, anchors)
@@ -145,7 +148,7 @@ class DetectionLoss(_Loss):
         """
         batch_size, num_pred, num_classes = pred_logits.shape
         num_tgt = tgt_labels.shape[1]
-        is_onehot = (len(tgt_labels.shape) == 3)
+        is_onehot = (tgt_labels.dim() == 3)
 
         if self.bg_class_position == "first":
             if is_onehot:
@@ -196,6 +199,9 @@ class DetectionLoss(_Loss):
             batch_size * num_pred * num_tgt, 4)
 
         # Compute the localization cost matrix.
-        loc_loss = self.loss_loc_module(pred_locs_rep, tgt_locs_rep).view(batch_size, num_pred, num_tgt)
+        loc_loss = self.loss_loc_module(pred_locs_rep, tgt_locs_rep)
+        if loc_loss.dim() == 2:
+            loc_loss = loc_loss.mean(dim=1)  # TODO: mean or sum reduction ?
+        loc_loss = loc_loss.view(batch_size, num_pred, num_tgt)
 
         return loc_loss

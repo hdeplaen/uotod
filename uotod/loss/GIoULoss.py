@@ -2,6 +2,7 @@ from torch import Tensor
 from torchvision.ops import generalized_box_iou_loss
 from torch.nn.modules.loss import _Loss
 
+
 class GIoULoss(_Loss):
     def __init__(self) -> None:
         """

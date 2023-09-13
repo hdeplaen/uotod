@@ -54,8 +54,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
-html_logo = 'uotod_logo.svg'
+# html_static_path = ['_static']
+# html_logo = 'uotod_logo.svg'
 
 
 # Add any paths that contain custom static files (such as style sheets) here,

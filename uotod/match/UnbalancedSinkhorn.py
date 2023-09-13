@@ -15,8 +15,8 @@ class UnbalancedSinkhorn(_Compiled):
     """
     _compiled_name = 'unbalanced'
 
-    @kwargs_decorator({'reg_pred': 1.,
-                       'reg_target': 1.})
+    @kwargs_decorator({'reg_pred': 100.,
+                       'reg_target': 100.})
     def __init__(self,**kwargs) -> None:
         super(UnbalancedSinkhorn, self).__init__(**kwargs)
 
