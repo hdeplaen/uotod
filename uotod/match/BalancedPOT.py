@@ -23,8 +23,8 @@ class BalancedPOT(_POT, _Sinkhorn):
         sols = []
         for idx in range(C.size(0)):
             hp = hist_pred[idx, :]
-            ht = hist_tgt[idx,:]
-            C_loc = C[idx,:,:]
+            ht = hist_tgt[idx, :]
+            C_loc = C[idx, :, :]
             sols.append(
                 self._pot_method(a=hp,
                                  b=ht,

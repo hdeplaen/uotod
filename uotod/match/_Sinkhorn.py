@@ -78,9 +78,7 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
 
         if self.normalize_cost_matrix:
             # Normalize the cost matrix to [0, 1]
-            C = cost_matrix / torch.clamp(cost_matrix.max(), min=1e-8)
-        else:
-            C = cost_matrix
+            cost_matrix = cost_matrix / torch.clamp(cost_matrix.max(), min=1e-8)
 
         # Compute the regularization parameter
         if self.reg_dimless is not None:

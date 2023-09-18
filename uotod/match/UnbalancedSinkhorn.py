@@ -32,7 +32,7 @@ class UnbalancedSinkhorn(_Compiled):
         return self._matching_method(hist_pred, hist_ttarget, C, self.reg, self._num_iter, self.reg_target, self.reg_pred)
 
     @torch.no_grad()
-    def _sinkhorn_python(self, hist_pred: Tensor, hist_ttarget: Tensor, C:Tensor, reg:float, num_iter: int, reg_pred:float, reg_target: float) -> Tensor:
+    def _sinkhorn_python(self, hist_pred: Tensor, hist_target: Tensor, C:Tensor, reg:float, num_iter: int, reg_pred:float, reg_target: float) -> Tensor:
         batch_size, num_pred, _ = C.shape
         factor1 = reg_pred / (reg_pred + reg) if reg_pred is not None else 1.
         factor2 = reg_target / (reg_target + reg) if reg_target is not None else 1.
@@ -43,11 +43,11 @@ class UnbalancedSinkhorn(_Compiled):
 
         # Iterations
         for _ in range(num_iter):
-            u = (hist_pred / (K * ((hist_ttarget / (K * u.unsqueeze(2)).sum(dim=1)).pow(factor2))
+            u = (hist_pred / (K * ((hist_target / (K * u.unsqueeze(2)).sum(dim=1)).pow(factor2))
                               .unsqueeze(1)).sum(dim=2)).pow(factor1)
 
         # Coupling matrix P = diag(u) @ K @ diag(v)
-        P = torch.einsum("ni,nij,nj->nij", u, K, (hist_ttarget / (K * u.unsqueeze(2)).sum(dim=1)).pow(factor2))
+        P = torch.einsum("ni,nij,nj->nij", u, K, (hist_target / (K * u.unsqueeze(2)).sum(dim=1)).pow(factor2))
 
         return P.data
 

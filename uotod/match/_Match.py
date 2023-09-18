@@ -19,6 +19,8 @@ class _Match(nn.Module, metaclass=ABCMeta):
     :param bg_class_position: Index of the background class. "first", "last" or "none" (no background class).
     :param bg_cost: Cost of the background class. Defaults to 10.
     :param is_anchor_based: If True, the matching is performed between the anchor boxes and the target boxes.
+    :type cls_match_cost: _Loss
+    :type loc_match_cost: _Loss
     :type bg_class_position: str, optional
     :type bg_cost: float, optional
     :type is_anchor_based: bool, optional
@@ -37,7 +39,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
             "At least a localization or classification cost must be provided."
         assert kwargs['bg_cost'] >= 0., "The background cost must a non-negative float."
         assert kwargs['bg_class_position'] in ["first", "last", "none"], \
-            "bg_class_index must be 'first', 'last' or 'none'"
+            "bg_class_position must be 'first', 'last' or 'none'"
 
         self.matching_cls_module = kwargs['cls_match_cost']
         self.matching_loc_module = kwargs['loc_match_cost']
@@ -60,18 +62,19 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :param input: Input containing the predicted logits and boxes.
             "pred_logits": Tensor of shape (batch_size, num_pred, num_classes).
             "pred_boxes": Tensor of shape (batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).
-        :type input: dictionnary
+        :type input: dictionary
         :param target: Target containing the target classes, boxes and mask.
             "labels": Tensor of shape (batch_size, num_targets).
             "boxes": Tensor of shape (batch_size, num_targets, 4), where the last dimension is (x1, y1, x2, y2).
             "mask": Tensor of shape (batch_size, num_targets).
-        :type target: dictionnary
+        :type target: dictionary
         :param anchors: the anchors used to compute the predicted boxes.
             (batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).
         :type anchors: Tensor
-        :return: the matching between the predicted and target boxes:
-            Tensor of shape (batch_size, num_pred, num_targets).
-        :rtype: Tensor
+        :return: the matching between the predicted and target boxes, and the cost matrix if returns_cost is True:
+            Tensor of shape (batch_size, num_pred, num_targets + 1). The last entry of the last dimension is the
+            background.
+        :rtype: Tensor (float) or Tuple(Tensor, Tensor)
 
         """
         # emptying the cache
@@ -110,20 +113,21 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :param input: Input containing the predicted logits and boxes.
             "pred_logits": Tensor of shape (batch_size, num_pred, num_classes).
             "pred_boxes": Tensor of shape (batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).
-        :type input: dictionnary
+        :type input: dictionary
         :param target: Target containing the target classes, boxes and mask.
             "labels": Tensor of shape (batch_size, num_targets).
             "boxes": Tensor of shape (batch_size, num_targets, 4), where the last dimension is (x1, y1, x2, y2).
             "mask": Tensor of shape (batch_size, num_targets).
-        :type target: dictionnary
+        :type target: dictionary
         :param anchors: the anchors used to compute the predicted boxes.
             (batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).
         :type anchors: Tensor
         :param background: Indicated whether the background has to be added.
         :type background: bool, optional
         :return: the matching between the predicted and target boxes:
-            Tensor of shape (batch_size, num_pred, num_targets).
-        :rtype: Tensor
+            Tensor of shape (batch_size, num_pred, num_targets + 1) or (batch_size, num_pred, num_targets) if
+            background is False.
+        :rtype: Tensor (float)
         """
         if self.is_anchor_based:
             assert anchors is not None, "The anchors must be provided for anchor-based matching methods."
@@ -211,7 +215,10 @@ class _Match(nn.Module, metaclass=ABCMeta):
             batch_size * num_pred * num_tgt, 4)
 
         # Compute the localization cost matrix.
-        loc_cost = self.matching_loc_module(pred_locs_rep, tgt_locs_rep).view(batch_size, num_pred, num_tgt)
+        loc_cost = self.matching_loc_module(pred_locs_rep, tgt_locs_rep)
+        if loc_cost.dim() == 2:
+            loc_cost = loc_cost.mean(dim=1)  # TODO: mean or sum reduction ?!
+        loc_cost = loc_cost.view(batch_size, num_pred, num_tgt)
 
         return loc_cost
 

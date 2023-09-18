@@ -6,6 +6,7 @@ from torch import Tensor
 from ._Match import _Match
 from ..utils import kwargs_decorator, extend_docstring
 
+
 @extend_docstring(_Match)
 class Min(_Match):
     r"""
