@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hungarian &mdash; uotod 0.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=10f1778b"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Balanced Sinkhorn" href="balanced.html" />
+    <link rel="prev" title="Matching Strategies" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            uotod
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Matching Strategies</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#live-demo">Live Demo</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#different-strategies">Different Strategies</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Hungarian</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#class">Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="balanced.html">Balanced Sinkhorn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="unbalanced.html">Unbalanced Sinkhorn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="balanced_pot.html">Balanced Sinkhorn from the Python Optimal Transport Library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="unbalanced_pot.html">Unbalanced Sinkhorn from the Python Optimal Transport Library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../loss/index.html">Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">uotod</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Matching Strategies</a></li>
+      <li class="breadcrumb-item active">Hungarian</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/match/hungarian.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hungarian">
+<h1>Hungarian<a class="headerlink" href="#hungarian" title="Link to this heading"></a></h1>
+<p>We consider the matching cost <span class="math notranslate nohighlight">\(\mathcal{L}_{\text{match}}\)</span> = <strong>cls_match_cost</strong> + <strong>loc_match_cost</strong>
+between the <span class="math notranslate nohighlight">\(N_p\)</span> predictions <span class="math notranslate nohighlight">\(\hat{\mathbf{y}}_i\)</span> and <span class="math notranslate nohighlight">\(N_t\)</span> targets <span class="math notranslate nohighlight">\(\mathbf{y}_j\)</span>. In particular, the cost of the background <span class="math notranslate nohighlight">\(\mathbf{y}_{N_t+1} = \varnothing\)</span> is given by
+<span class="math notranslate nohighlight">\(\mathcal{L}_{\text{match}}\left(\hat{\mathbf{y}}_i, \varnothing\right)\)</span> = <strong>bg_cost</strong>.</p>
+<p>The Hungarian matching <span id="id1">[<a class="reference internal" href="../references.html#id13" title="Harold W Kuhn. The hungarian method for the assignment problem. Naval research logistics quarterly, 2(1-2):83–97, 1955.">Kuh55</a>, <a class="reference internal" href="../references.html#id14" title="James Munkres. Algorithms for the assignment and transportation problems. Journal of the society for industrial and applied mathematics, 5(1):32–38, 1957.">Mun57</a>]</span> minimizes the cost of the pairwise matches between the <span class="math notranslate nohighlight">\(N_t\)</span> ground truth objects <span class="math notranslate nohighlight">\(\left\{\mathbf{y}_j\right\}_{i=1}\)</span> with the <span class="math notranslate nohighlight">\(N_p\)</span> predictions:</p>
+<div class="math notranslate nohighlight">
+\[\hat{\sigma} = \mathrm{arg\, min} \left\{\sum_{j=1}^{N_t} \mathcal{L}_{\text{match}}\left(\hat{\mathbf{y}}_{\sigma(j)},  \mathbf{y}_{j} \right): \sigma \in \mathcal{P}_{N_t}(\left[\!\left[ N_p \right]\!\right])\right\},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{P}_{N_t}(\left[\!\left[ N_p\right]\!\right]) = \big\{\sigma \in \mathcal{P}(\left[\!\left[ N_p \right]\!\right]) : |\sigma| = N_t \big\}\)</span> is the set of possible combinations of <span class="math notranslate nohighlight">\(N_t\)</span> in <span class="math notranslate nohighlight">\(N_p\)</span>, with <span class="math notranslate nohighlight">\(\mathcal{P}(\left[\!\left[ N_p \right]\!\right])\)</span> the power set of <span class="math notranslate nohighlight">\(\left[\!\left[ N_p\right]\!\right]\)</span> (the set of all subsets). The match in matrix form <span class="math notranslate nohighlight">\(\mathbf{P}\)</span>  itself is given by <span class="math notranslate nohighlight">\(\hat{\sigma}(j) = \left\{ i : P_{i,j} \neq 0 \right\}\)</span>, or equivalently <span class="math notranslate nohighlight">\(\hat{\sigma}(j) = \left\{ i : P_{i,j} = 1/N_p \right\}\)</span>. The unmatched predictions are matched to the background if applicable.</p>
+<p>As an example, this matching strategy is used in the DETR family <span id="id2">[<a class="reference internal" href="../references.html#id7" title="Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, and Sergey Zagoruyko. End-to-end object detection with transformers. In European conference on computer vision, 213–229. Springer, 2020.">CMS+20</a>, <a class="reference internal" href="../references.html#id8" title="Xizhou Zhu, Weijie Su, Lewei Lu, Bin Li, Xiaogang Wang, and Jifeng Dai. Deformable detr: deformable transformers for end-to-end object detection. In International Conference on Learning Representations. 2021. URL: https://openreview.net/forum?id=gZ9hCDWe6ke.">ZSL+21</a>]</span>. The matching is one-to-one, minimizing the total cost. Every ground truth object is matched to a unique prediction, thus reducing the number of predictions needed. A downside is that the one-to-one matches may vary from one epoch to the next, again slowing down convergence <span id="id3">[<a class="reference internal" href="../references.html#id77" title="Henri De Plaen, Pierre-François De Plaen, Johan A. K. Suykens, Marc Proesmans, Tinne Tuytelaars, and Luc Van Gool. Unbalanced optimal transport: a unified framework for object detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 3198-3207. June 2023.">DPDPS+23</a>, <a class="reference internal" href="../references.html#id9" title="Feng Li, Hao Zhang, Shilong Liu, Jian Guo, Lionel M Ni, and Lei Zhang. Dn-detr: accelerate detr training by introducing query denoising. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, 13619–13627. 2022.">LZL+22</a>]</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Due its sequential nature, this matching strategy cannot make good use parallelization. In its SciPy implementation (default), it only runs on the CPU, moving back and forth the data if necessary.
+If regularization is not an issue (it often even helps with the convergence), we encourage to use <a class="reference internal" href="balanced.html#uotod.match.BalancedSinkhorn" title="uotod.match.BalancedSinkhorn"><code class="xref py py-class docutils literal notranslate"><span class="pre">uotod.match.BalancedSinkhorn</span></code></a> instead.</p>
+</div>
+<section id="class">
+<h2>Class<a class="headerlink" href="#class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="uotod.match.Hungarian">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uotod.match.</span></span><span class="sig-name descname"><span class="pre">Hungarian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#uotod.match.Hungarian" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scipy</strong> (<em>bool</em><em>, </em><em>optional</em>) – Uses SciPy’s implementation if <cite>True</cite> (default). Otherwise, uses the implementation of <a class="reference external" href="https://github.com/bkj/auction-lap">this repo</a>, following from <span id="id4">[<a class="reference internal" href="../references.html#id76" title="Dimitri P Bertsekas. Auction algorithms for network flow problems: a tutorial introduction. Computational optimization and applications, 1:7–66, 1992.">Ber92</a>]</span>.</p></li>
+<li><p><strong>cls_match_cost</strong> (<em>_Loss</em>) – Classification loss used to compute the matching, if any.</p></li>
+<li><p><strong>loc_match_cost</strong> (<em>_Loss</em>) – Localization loss used to compute the matching, if any.</p></li>
+<li><p><strong>bg_class_position</strong> (<em>str</em><em>, </em><em>optional</em>) – Index of the background class. “first”, “last” or “none” (no background class).</p></li>
+<li><p><strong>bg_cost</strong> (<em>float</em><em>, </em><em>optional</em>) – Cost of the background class. Defaults to 10.</p></li>
+<li><p><strong>is_anchor_based</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the matching is performed between the anchor boxes and the target boxes.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="uotod.match.Hungarian.compute_cost_matrix">
+<span class="sig-name descname"><span class="pre">compute_cost_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anchors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#uotod.match.Hungarian.compute_cost_matrix" title="Link to this definition"></a></dt>
+<dd><p>Computes a batch of cost matrices between the predicted and target boxes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<em>dictionary</em>) – Input containing the predicted logits and boxes.
+“pred_logits”: Tensor of shape (batch_size, num_pred, num_classes).
+“pred_boxes”: Tensor of shape (batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).</p></li>
+<li><p><strong>target</strong> (<em>dictionary</em>) – Target containing the target classes, boxes and mask.
+“labels”: Tensor of shape (batch_size, num_targets).
+“boxes”: Tensor of shape (batch_size, num_targets, 4), where the last dimension is (x1, y1, x2, y2).
+“mask”: Tensor of shape (batch_size, num_targets).</p></li>
+<li><p><strong>anchors</strong> (<em>Tensor</em>) – the anchors used to compute the predicted boxes.
+(batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).</p></li>
+<li><p><strong>background</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicated whether the background has to be added.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the matching between the predicted and target boxes:
+Tensor of shape (batch_size, num_pred, num_targets + 1) or (batch_size, num_pred, num_targets) if
+background is False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uotod.match.Hungarian.compute_matching">
+<span class="sig-name descname"><span class="pre">compute_matching</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cost_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#uotod.match.Hungarian.compute_matching" title="Link to this definition"></a></dt>
+<dd><p>Computes the matching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cost_matrix</strong> (<em>Tensor</em>) – Cost matrix of shape (batch_size, num_pred, num_targets + 1).</p></li>
+<li><p><strong>target_mask</strong> (<em>BoolTensor</em><em>, </em><em>optional</em>) – Target mask of shape (batch_size, num_targets).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The matching <span class="math notranslate nohighlight">\(\mathbf{P}\)</span> for each element of the batch. Tensor of shape (batch_size, num_pred, num_targets + 1). The last entry of the last
+dimension [:, :, num_target+1] is the background.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uotod.match.Hungarian.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anchors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns_cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#uotod.match.Hungarian.forward" title="Link to this definition"></a></dt>
+<dd><p>Computes a batch of matchings between the predicted and target boxes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<em>dictionary</em>) – Input containing the predicted logits and boxes.
+“pred_logits”: Tensor of shape (batch_size, num_pred, num_classes).
+“pred_boxes”: Tensor of shape (batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).</p></li>
+<li><p><strong>target</strong> (<em>dictionary</em>) – Target containing the target classes, boxes and mask.
+“labels”: Tensor of shape (batch_size, num_targets).
+“boxes”: Tensor of shape (batch_size, num_targets, 4), where the last dimension is (x1, y1, x2, y2).
+“mask”: Tensor of shape (batch_size, num_targets).</p></li>
+<li><p><strong>anchors</strong> (<em>Tensor</em>) – the anchors used to compute the predicted boxes.
+(batch_size, num_pred, 4), where the last dimension is (x1, y1, x2, y2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the matching between the predicted and target boxes, and the cost matrix if returns_cost is True:
+Tensor of shape (batch_size, num_pred, num_targets + 1). The last entry of the last dimension is the
+background.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor (float) or Tuple(Tensor, Tensor)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uotod.match.Hungarian.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_background_match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#uotod.match.Hungarian.plot" title="Link to this definition"></a></dt>
+<dd><p>Plots from the last batch
+# TODO: extensive description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of the image to be plotted.</p></li>
+<li><p><strong>img</strong> (<em>Tensor</em><em> or </em><em>array</em><em>, </em><em>optional</em>) – Image to be plotted. If it is not None, the boxes plot is computed.</p></li>
+<li><p><strong>plot_cost</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plots the cost matrix between the predictions and the targets, including background.</p></li>
+<li><p><strong>plot_match</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plots the cost matrix between the predictions and the targets, including background.</p></li>
+<li><p><strong>max_background_match</strong> (<em>float</em><em>, </em><em>optional</em>) – A threshold to only plot relevant matched predictions.
+The predictions are only plotted if the value matched to the background does not exceed
+<cite>max_background_match</cite>. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Matplotlib figures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple(fig, fig, fig)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uotod</span>
+<span class="kn">from</span> <span class="nn">sample</span> <span class="kn">import</span> <span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">img</span>
+
+<span class="n">L</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">loss</span><span class="o">.</span><span class="n">GIoULoss</span><span class="p">()</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">Hungarian</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">H</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+
+<span class="n">fig_img</span><span class="p">,</span> <span class="n">fig_cost</span><span class="p">,</span> <span class="n">fig_match</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">img</span><span class="o">=</span><span class="n">img</span><span class="p">)</span>
+<span class="n">fig_match</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/828538e638a5a81bd36d294c6b4cbce1/hungarian.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+<figure class="align-default" id="id5">
+<img alt="../_images/hungarian_00.png" class="plot-directive" src="../_images/hungarian_00.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/717d99780c8981363f652e53cce1c84f/hungarian_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/4f815e8c4cf1c07a12cf0d2671b85f97/hungarian_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/2af61a788f44ca3260e20b7b7b345567/hungarian_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id6">
+<img alt="../_images/hungarian_01.png" class="plot-directive" src="../_images/hungarian_01.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/69de7552493159419f8053655c1fe49f/hungarian_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/27c704a85fe5374491fc8a954ec72563/hungarian_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/8ec1feec468f3ad89f394ab3450ceb3a/hungarian_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id7">
+<img alt="../_images/hungarian_02.png" class="plot-directive" src="../_images/hungarian_02.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/e13109dadf1efeb3378a788555cae2b3/hungarian_02.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/3e4631d970d0c2295b7353d22ff57746/hungarian_02.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/960b1b662f239dbc433d2af588af1e42/hungarian_02.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<section id="regularization-with-balanced-sinkhorn">
+<h3>Regularization with Balanced Sinkhorn<a class="headerlink" href="#regularization-with-balanced-sinkhorn" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uotod</span>
+<span class="kn">from</span> <span class="nn">sample</span> <span class="kn">import</span> <span class="nb">input</span><span class="p">,</span> <span class="n">target</span>
+
+<span class="n">L</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">loss</span><span class="o">.</span><span class="n">GIoULoss</span><span class="p">()</span>
+
+<span class="n">H_hungarian</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">Hungarian</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">H_balanced_small_reg</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">H_balanced_big_reg</span> <span class="o">=</span> <span class="n">uotod</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">BalancedSinkhorn</span><span class="p">(</span><span class="n">loc_match_cost</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">bg_cost</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">match_hungarian</span> <span class="o">=</span> <span class="n">H_hungarian</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+<span class="n">match_balanced_small_reg</span> <span class="o">=</span> <span class="n">H_balanced_small_reg</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+<span class="n">match_balanced_big_reg</span> <span class="o">=</span> <span class="n">H_balanced_big_reg</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+<span class="n">uotod</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">match_hungarian</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Hungarian (reg=0)&#39;</span><span class="p">)</span>
+<span class="n">uotod</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">match_balanced_small_reg</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Balanced Sinkhorn </span><span class="se">\n</span><span class="s1"> with reg=0.01&#39;</span><span class="p">)</span>
+<span class="n">uotod</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">match_balanced_big_reg</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Balanced Sinkhorn </span><span class="se">\n</span><span class="s1"> with reg=0.1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/ee7cbbd354adef891491ee2259356de1/balanced_vs_hungarian.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+<figure class="align-default" id="id8">
+<img alt="../_images/balanced_vs_hungarian_00.png" class="plot-directive" src="../_images/balanced_vs_hungarian_00.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/e4f9af759017d2b16a9d0cfb734c13fd/balanced_vs_hungarian_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/9894b1a2c69bd449ba5624c8d97b13a7/balanced_vs_hungarian_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/95c243be13ccb57792f70f31cbb51c0b/balanced_vs_hungarian_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id9">
+<img alt="../_images/balanced_vs_hungarian_01.png" class="plot-directive" src="../_images/balanced_vs_hungarian_01.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/a4e04583ae9773c62b0790886e1ce493/balanced_vs_hungarian_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/596727689a39827d88f76b1fbdf6b9b7/balanced_vs_hungarian_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/1953e5a625d398656c171cefe852ce93/balanced_vs_hungarian_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id10">
+<img alt="../_images/balanced_vs_hungarian_02.png" class="plot-directive" src="../_images/balanced_vs_hungarian_02.png" />
+<figcaption>
+<p><span class="caption-text">(<a class="reference download internal" download="" href="../_downloads/b28237a63039f54fb9f57271baa7610e/balanced_vs_hungarian_02.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/ced2a1b93f1374e4f476ad37d39752c3/balanced_vs_hungarian_02.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/0596eb2cf776636e6553adb7dae36648/balanced_vs_hungarian_02.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id10" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Matching Strategies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="balanced.html" class="btn btn-neutral float-right" title="Balanced Sinkhorn" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright KU Leuven, September 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

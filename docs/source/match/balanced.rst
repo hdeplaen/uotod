@@ -23,10 +23,5 @@ Class
 Example
 =======
 
-.. plot:: ../../example/balanced.py
-    :include-source:
-
-This is in essence a regularized version of the Hungarian algorithm.
-
-.. plot:: ../../example/balanced_vs_hungarian.py
+.. plot:: ../../example/match/balanced.py
     :include-source:

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 from torch import Tensor, BoolTensor, cat
 from matplotlib import pyplot as plt
 
@@ -9,20 +9,29 @@ from .params import MATCH_CMAP, COST_CMAP
 def prune_matrix(m,
                  mask_pred: Optional[BoolTensor] = None,
                  mask_target: Optional[BoolTensor] = None,
-                 background: bool = True):
+                 background: bool = True) -> Tuple[Tensor, int, int]:
+    num_pred = m.size(0)
+    if not background and mask_target.size(0) == m.size(1):
+        num_target = m.size(1)
+    else:
+        num_target = m.shape(1) - 1
+
     if mask_pred is not None:
         m = m[mask_pred, :]
     if mask_target is not None:
-        if background:
-            m = cat((m[:,:-1][:, mask_target],m[:,-1:]), dim=1)
-        else:
-            m = m[:,:-1][:, mask_target]
-    return m
+        if background:  # if a background is specified
+            m = cat((m[:, :-1][:, mask_target], m[:, -1:]), dim=1)
+        elif not background and mask_target.size(0) == m.size(1):  # if the background does not exist
+            m = m[:, mask_target]
+        else:  # if the background exists and is to be removed
+            m = m[:, :-1][:, mask_target]
+
+    return m, num_pred, num_target
 
 
-def matrix(m, cmap, mask_pred: Optional[BoolTensor] = None, mask_target: Optional[BoolTensor] = None, background: bool = True):
-    num_pred, num_target = m.size()
-    m = prune_matrix(m, mask_pred, mask_target, background)
+def matrix(m, cmap, mask_pred: Optional[BoolTensor] = None, mask_target: Optional[BoolTensor] = None,
+           background: bool = True):
+    m, num_pred, num_target = prune_matrix(m, mask_pred, mask_target, background)
     num_pred_pruned, num_target_pruned = m.size()
     if isinstance(m, Tensor): m = m.cpu()
 
@@ -31,9 +40,9 @@ def matrix(m, cmap, mask_pred: Optional[BoolTensor] = None, mask_target: Optiona
     ax = plt.gca()
 
     pl = prediction_labels(num_pred, mask_pred)
-    tl = target_labels(num_target-1, background, mask_target)
+    tl = target_labels(num_target, background, mask_target)
     pc = prediction_colors(num_pred, mask_pred)
-    tc = target_colors(num_target-1, background, mask_target)
+    tc = target_colors(num_target, background, mask_target)
 
     ax.set_yticks(range(num_pred_pruned), pl)
     ax.set_xticks(range(num_target_pruned), tl)

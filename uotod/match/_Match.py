@@ -16,20 +16,20 @@ class _Match(nn.Module, metaclass=ABCMeta):
     r"""
     :param cls_match_cost: Classification loss used to compute the matching, if any.
     :param loc_match_cost: Localization loss used to compute the matching, if any.
-    :param bg_class_position: Index of the background class. "first", "last" or "none" (no background class).
-    :param bg_cost: Cost of the background class. Defaults to 10.
+    :param background: Indicates whether there is a background. Defaults to True.
+    :param background_cost: Cost of the background class. Defaults to 10.
     :param is_anchor_based: If True, the matching is performed between the anchor boxes and the target boxes.
     :type cls_match_cost: _Loss
     :type loc_match_cost: _Loss
-    :type bg_class_position: str, optional
-    :type bg_cost: float, optional
+    :type background: bool, optional
+    :type background_cost: float, optional
     :type is_anchor_based: bool, optional
     """
 
     @kwargs_decorator({'cls_match_cost': None,
                        'loc_match_cost': None,
-                       'bg_class_position': "first",
-                       'bg_cost': 10.0,
+                       'background': True,
+                       'background_cost': 10.0,
                        'is_anchor_based': False,
                        'individual': True})
     def __init__(self, **kwargs) -> None:
@@ -37,15 +37,14 @@ class _Match(nn.Module, metaclass=ABCMeta):
 
         assert isinstance(kwargs['cls_match_cost'], _Loss) or isinstance(kwargs['loc_match_cost'], _Loss), \
             "At least a localization or classification cost must be provided."
-        assert kwargs['bg_cost'] >= 0., "The background cost must a non-negative float."
-        assert kwargs['bg_class_position'] in ["first", "last", "none"], \
-            "bg_class_position must be 'first', 'last' or 'none'"
+        assert isinstance(kwargs['background'], bool), 'The background argument must be set to either True or False.'
+        assert kwargs['background_cost'] >= 0., "The background cost must a non-negative float."
 
         self.matching_cls_module = kwargs['cls_match_cost']
         self.matching_loc_module = kwargs['loc_match_cost']
 
-        self.bg_class_position = kwargs['bg_class_position']  # FIXME: this is not used; but do we need it?
-        self.bg_cost = kwargs['bg_cost']
+        self.background = kwargs['background']
+        self.background_cost = kwargs['background_cost']
         self.is_anchor_based = kwargs['is_anchor_based']
 
         self._individual = kwargs['individual']
@@ -106,7 +105,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
     def compute_cost_matrix(self,
                             input: Union[Dict[str, Tensor], List[Dict[str, Tensor]]],
                             target: Union[Dict[str, Tensor], List[Dict[str, Tensor]]],
-                            anchors: Optional[Tensor] = None, background: bool = True) -> Tensor:
+                            anchors: Optional[Tensor] = None) -> Tensor:
         r"""
         Computes a batch of cost matrices between the predicted and target boxes.
 
@@ -158,7 +157,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
         cost_matrix = cost_matrix * target["mask"].unsqueeze(dim=1).expand(cost_matrix.shape)
 
         # Add the background cost.
-        if background: cost_matrix = torch.cat([cost_matrix, self.bg_cost * torch.ones_like(cost_matrix[:, :, :1])],
+        if self.background: cost_matrix = torch.cat([cost_matrix, self.background_cost * torch.ones_like(cost_matrix[:, :, :1])],
                                                dim=2)
 
         return cost_matrix
@@ -222,32 +221,44 @@ class _Match(nn.Module, metaclass=ABCMeta):
 
         return loc_cost
 
-    def compute_matching(self, cost_matrix: Tensor, target_mask: Tensor) -> Tensor:
+    def compute_matching(self, cost_matrix: Tensor, target_mask: Optional[Tensor]) -> Tensor:
         r"""
         Computes the matching.
 
-        :param cost_matrix: Cost matrix. Tensor of shape (batch_size, num_pred, num_targets + 1).
-        :param target_mask: Target mask. Tensor of shape (batch_size, num_targets).
-        :return: the matching. Tensor of shape (batch_size, num_pred, num_targets + 1). The last entry of the last
-            dimension is the background.
+        :param cost_matrix: Cost matrix of shape (batch_size, num_pred, num_targets + 1).
+        :param target_mask: Target mask of shape (batch_size, num_targets).
+        :type cost_matrix: Tensor
+        :type target_mask: BoolTensor, optional
+        :return: The matching :math:`\mathbf{P}` for each element of the batch. Tensor of shape (batch_size, num_pred, num_targets + 1). The last entry of the last
+            dimension [:, :, num_target+1] is the background.
         """
-        if self._individual:
-            sols = []
-            for idx in range(cost_matrix.size(0)):
-                sols.append(
+        p = torch.zeros_like(cost_matrix)
+        if target_mask is None:
+            if self._individual:
+                for idx in range(cost_matrix.size(0)):
                     self._compute_matching_apart(cost_matrix[idx, :, :],
-                                                 target_mask[idx, :]).unsqueeze(0)
-                )
-            return torch.cat(sols, dim=0)
-        return self._compute_matching_together(cost_matrix, target_mask)
+                                                 p[idx, :, :])
+            else:
+                self._compute_matching_together(cost_matrix, p)
+        else:
+            if self._individual:
+                for idx in range(cost_matrix.size(0)):
+                    self._compute_matching_apart(cost_matrix[idx, :, :],
+                                                 p[idx, :, :],
+                                                 target_mask[idx, :])
+            else:
+                self._compute_matching_together(cost_matrix, p, target_mask)
+        return p
 
-    def _compute_matching_together(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
+    def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
+                                   **kwargs) -> Tensor:
         raise Exception('Parallelism is not possible for this matching. Please compute each match individually by '
                         'not setting the argument individual to True during construction.')
 
     @abstractmethod
-    def _compute_matching_apart(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
-        pass
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
+                                **kwargs) -> Tensor:
+        raise NotImplementedError
 
     def plot(self, idx=0, img: Optional[Union[Tensor, array]] = None,
              plot_cost: bool = True,
@@ -256,6 +267,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
              background: bool = True):
         r"""
         Plots from the last batch
+        # TODO: extensive description
 
         :param idx: Index of the image to be plotted.
         :type idx: int, optional
@@ -272,6 +284,8 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :return: Matplotlib figures
         :rtype: Tuple(fig, fig, fig)
         """
+        if not self.background:
+            background = False
 
         matching_matrix = self._last_match[idx, :, :]
         pred_mask = matching_matrix[:, -1] <= max_background_match

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 from torch import Tensor
 
@@ -17,6 +19,7 @@ class BalancedSinkhorn(_Compiled):
     def _matching(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float) -> Tensor:
         return self._matching_method(hist_pred, hist_tgt, C, reg, self._num_iter)
 
+    @torch.no_grad()
     def _sinkhorn_python(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float, num_iter: int) -> Tensor:
         batch_size, num_pred, _ = C.shape
 
@@ -33,16 +36,18 @@ class BalancedSinkhorn(_Compiled):
 
         return P.data
 
-    def _compute_matching_together(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
-        return self._matching_method(kwargs['hist_pred'],
-                                     kwargs['hist_target'],
-                                     C=cost_matrix,
-                                     reg=kwargs['reg'],
-                                     num_iter=self.num_iter)
+    def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
+                                   **kwargs):
+        out_view[:,:,:] = self._matching_method(kwargs['hist_pred'],
+                                         kwargs['hist_target'],
+                                         C=cost_matrix,
+                                         reg=kwargs['reg'],
+                                         num_iter=self.num_iter)
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, target_mask: Tensor, **kwargs) -> Tensor:
-        return self._matching_method(kwargs['hist_pred'].unsqueeze(0),
-                                     kwargs['hist_target'].unsqueeze(0),
-                                     C=cost_matrix.unsqueeze(0),
-                                     reg=kwargs['reg'],
-                                     num_iter=self.num_iter)
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
+                                **kwargs):
+        out_view[:,:] = self._matching_method(kwargs['hist_pred'].unsqueeze(0),
+                                         kwargs['hist_target'].unsqueeze(0),
+                                         C=cost_matrix.unsqueeze(0),
+                                         reg=kwargs['reg'],
+                                         num_iter=self.num_iter).squeeze(dim=0)

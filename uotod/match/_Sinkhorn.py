@@ -8,6 +8,7 @@ from torch import Tensor
 from ._Match import _Match
 from ..utils import kwargs_decorator, extend_docstring
 
+
 @extend_docstring(_Match)
 class _Sinkhorn(_Match, metaclass=ABCMeta):
     r"""
@@ -18,6 +19,7 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
     :type reg_dimless: float, optional
     :type reg: float, optional
     """
+
     @kwargs_decorator({'normalize_cost_matrix': True,
                        'individual': False,
                        'reg_dimless': 0.12,
@@ -87,25 +89,23 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
         else:
             reg = self.reg
 
+        matching = torch.zeros_like(cost_matrix)
+
         # Compute the matching
         if self._individual:
-            sols = []
             for idx in range(cost_matrix.size(0)):
-                sols.append(
-                    self._compute_matching_apart(cost_matrix[idx, :, :],
-                                                 target_mask[idx, :],
-                                                 reg=reg,
-                                                 hist_pred=hist_pred[idx,:],
-                                                 hist_target=hist_target[idx,:])
-                    .unsqueeze(0)
-                )
-            matching = torch.cat(sols, dim=0)
+                self._compute_matching_apart(cost_matrix[idx, :, :],
+                                             matching[idx, :, :],
+                                             reg=reg,
+                                             hist_pred=hist_pred[idx, :],
+                                             hist_target=hist_target[idx, :])
         else:
-            matching = self._compute_matching_together(cost_matrix,
-                                                       target_mask,
-                                                       reg=reg,
-                                                       hist_pred=hist_pred,
-                                                       hist_target=hist_target)
+            self._compute_matching_together(cost_matrix,
+                                            matching,
+                                            target_mask,
+                                            reg=reg,
+                                            hist_pred=hist_pred,
+                                            hist_target=hist_target)
         matching = matching * num_pred
 
         return matching

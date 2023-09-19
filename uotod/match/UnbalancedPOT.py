@@ -1,9 +1,12 @@
+from typing import Optional
+
 import torch
 from torch import Tensor
 
 from ._POT import _POT
 from ._Sinkhorn import _Sinkhorn
 from ..utils import kwargs_decorator, extend_docstring
+
 
 @extend_docstring(_Sinkhorn)
 class UnbalancedPOT(_POT, _Sinkhorn):
@@ -26,19 +29,11 @@ class UnbalancedPOT(_POT, _Sinkhorn):
         super(UnbalancedPOT, self).__init__(**{'balanced': False, **kwargs})
         self.reg_pred_target = kwargs['reg_pred_target']
 
-    def _matching(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float) -> Tensor:
-        sols = []
-        for idx in range(C.size(0)):
-            hp = hist_pred[idx, :]
-            ht = hist_tgt[idx, :]
-            C_loc = C[idx, :, :]
-            sols.append(
-                self._pot_method(a=hp,
-                                 b=ht,
-                                 M=C_loc,
-                                 reg=reg,
-                                 reg_m=self.reg_pred_target,
-                                 **self._method_kwargs) \
-                    .unsqueeze(0)
-            )
-        return torch.cat(sols, dim=0)
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
+                                **kwargs):
+        out_view[:, :] = self._matching_method(a=kwargs['hist_pred'],
+                                               b=kwargs['hist_target'],
+                                               M=cost_matrix,
+                                               reg=kwargs['reg'],
+                                               reg_m=self.reg_pred_target,
+                                               **self._method_kwargs)

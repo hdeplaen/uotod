@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 from torch import Tensor
 
@@ -19,20 +21,10 @@ class BalancedPOT(_POT, _Sinkhorn):
             f"Only the following methods are available in the balanced case: {BalancedPOT.available_methods}"
         super(BalancedPOT, self).__init__(**{'balanced': True, **kwargs})
 
-    def _matching(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float) -> Tensor:
-        sols = []
-        for idx in range(C.size(0)):
-            hp = hist_pred[idx, :]
-            ht = hist_tgt[idx, :]
-            C_loc = C[idx, :, :]
-            sols.append(
-                self._pot_method(a=hp,
-                                 b=ht,
-                                 M=C_loc,
-                                 reg=reg,
-                                 **self._method_kwargs).unsqueeze(0)
-            )
-        return torch.cat(sols, dim=0)
-
-
-
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
+                                **kwargs):
+        out_view[:, :] = self._matching_method(a=kwargs['hist_pred'],
+                                               b=kwargs['hist_target'],
+                                               M=cost_matrix,
+                                               reg=kwargs['reg'],
+                                               **self._method_kwargs)

@@ -1,6 +1,12 @@
+# HAND CRAFTED EXAMPLE FOR ILLUSTRATION PURPOSE
+
 import numpy
 from PIL import Image
 import torch
+
+
+import os
+print(os.getcwd())
 
 with Image.open('img.jpg') as pil_img:
     img = numpy.asarray(pil_img)
@@ -8,11 +14,11 @@ with Image.open('img.jpg') as pil_img:
 
 num_classes = 2
 
-boxes_pred = torch.tensor([[25, 12, 242, 215],      # 1
-                           [362, 126, 469, 425],    # 2
-                           [87, 241, 221, 343],     # 3
-                           [41, 52, 353, 283],      # 4
-                           [287, 76, 439, 388]], dtype=torch.float)    # 5
+boxes_pred = torch.tensor([[25, 12, 242, 215],                     # 1
+                           [362, 126, 469, 425],                        # 2
+                           [87, 241, 221, 343],                         # 3
+                           [41, 52, 353, 283],                          # 4
+                           [287, 76, 439, 388]], dtype=torch.float)     # 5
 
 cls_pred = torch.tensor([[0.2, 0.7, 0.1],
                         [0.1, 0.05, 0.85],
@@ -36,10 +42,10 @@ target = {
     'boxes': boxes_target.unsqueeze(0),
     'mask': mask_target.unsqueeze(0)
 }
-anchors = torch.tensor([[0, 0, 200, 200],      # 1
-                        [300, 100, 400, 400],    # 2
-                        [100, 250, 200, 320],     # 3
-                        [50, 50, 350, 300],      # 4
+anchors = torch.tensor([[0, 0, 200, 200],                      # 1
+                        [300, 100, 400, 400],                       # 2
+                        [100, 250, 200, 320],                       # 3
+                        [50, 50, 350, 300],                         # 4
                         [300, 50, 450, 400]], dtype=torch.float)    # 5
 
 # move to cuda

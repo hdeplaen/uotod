@@ -9,7 +9,6 @@ from ._Match import _Match
 from ..utils import extend_docstring, kwargs_decorator
 
 
-
 @extend_docstring(_Match)
 class Hungarian(_Match):
     r"""
@@ -99,19 +98,15 @@ class Hungarian(_Match):
         return matching
 
     @torch.no_grad()
-    def _compute_matching_apart(self, cost_matrix: Tensor, target_mask: Tensor) -> Tensor:
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Tensor) -> Tensor:
         r"""
         This method makes use of Scipy's `linear_sum_assignment`.
         """
 
-        # TODO: optimize contiguous memory management
-
         if self._scipy:
-            matching = self._scipy_auction(cost_matrix[:, :-1])
+            out_view[:, :-1] = self._scipy_auction(cost_matrix[:, :-1])
         else:
-            matching = self._bkj_auction(cost_matrix[:, :-1])
+            out_view[:, :-1] = self._bkj_auction(cost_matrix[:, :-1])
 
         # Assign unmatched predictions to the background
-        background = 1. - matching.sum(dim=1)
-        matching = torch.cat((matching, background.unsqueeze(1)), dim=1)
-        return matching
+        out_view[:, -1] = 1. - out_view[:, :-1].sum(dim=1)

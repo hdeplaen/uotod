@@ -50,26 +50,9 @@ Example
 
 The following shows the limit cases of Unbalanced Sinkhorn. As each limit case comes with its own algorithm, it is preferrable to use that one for efficiency. They are provided here as an illustration to better understand the role of each parameter. The goal of this algorithm is compute hybrid cases between the limit cases that are unattainable otherwise.
 
-Approximation of a (Soft) Minimum
----------------------------------
-
-.. plot:: ../../example/unbalanced.py
+.. plot:: ../../example/match/unbalanced.py
     :include-source:
 
-Approximation of a (Soft) Minimum
----------------------------------
+Limit Cases
+===========
 
-.. plot:: ../../example/unbalanced_vs_min.py
-    :include-source:
-
-
-Approximation of the Balanced Case and the Hungarian Algorithm
---------------------------------------------------------------
-
-This example shows how increasing the both constraint regularization parameter tends to the Balanced case. If this limit case is seeked after, it is preferrable to use :class:`uotod.match.BalancedSinkhorn` instead.
-
-.. plot:: ../../example/unbalanced_vs_balanced.py
-    :include-source:
-
-
-If lowering the regularization, we also recover the Hungarian algorithm.
