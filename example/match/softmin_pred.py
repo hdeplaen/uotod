@@ -2,8 +2,7 @@ import uotod
 from uotod.sample import input, target, imgs
 
 L = uotod.loss.GIoULoss()
-H = uotod.match.Hungarian(loc_match_cost=L, background_cost=0.8)
+H = uotod.match.SoftMin(loc_match_cost=L, background_cost=0.8, source='pred')
 H(input, target)
 
 fig_img, fig_cost, fig_match = H.plot(idx=0, img=imgs)
-fig_match.show()

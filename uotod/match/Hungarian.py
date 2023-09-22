@@ -103,10 +103,17 @@ class Hungarian(_Match):
         This method makes use of Scipy's `linear_sum_assignment`.
         """
 
-        if self._scipy:
-            out_view[:, :-1] = self._scipy_auction(cost_matrix[:, :-1])
-        else:
-            out_view[:, :-1] = self._bkj_auction(cost_matrix[:, :-1])
+        if self.background:
+            if self._scipy:
+                out_view[:, :-1] = self._scipy_auction(cost_matrix[:, :-1])
+            else:
+                out_view[:, :-1] = self._bkj_auction(cost_matrix[:, :-1])
 
-        # Assign unmatched predictions to the background
-        out_view[:, -1] = 1. - out_view[:, :-1].sum(dim=1)
+            # Assign unmatched predictions to the background
+            out_view[:, -1] = 1. - out_view[:, :-1].sum(dim=1)
+        else:
+            if self._scipy:
+                out_view = self._scipy_auction(cost_matrix)
+            else:
+                out_view = self._bkj_auction(cost_matrix)
+        return out_view

@@ -94,18 +94,18 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
         # Compute the matching
         if self._individual:
             for idx in range(cost_matrix.size(0)):
-                self._compute_matching_apart(cost_matrix[idx, :, :],
-                                             matching[idx, :, :],
-                                             reg=reg,
-                                             hist_pred=hist_pred[idx, :],
-                                             hist_target=hist_target[idx, :])
+                matching[idx, :, :] = self._compute_matching_apart(cost_matrix.select(0, idx),
+                                                                   matching.select(0, idx),
+                                                                   reg=reg,
+                                                                   hist_pred=hist_pred.select(0, idx),
+                                                                   hist_target=hist_target.select(0, idx))
         else:
-            self._compute_matching_together(cost_matrix,
-                                            matching,
-                                            target_mask,
-                                            reg=reg,
-                                            hist_pred=hist_pred,
-                                            hist_target=hist_target)
+            matching = self._compute_matching_together(cost_matrix,
+                                                       matching,
+                                                       target_mask,
+                                                       reg=reg,
+                                                       hist_pred=hist_pred,
+                                                       hist_target=hist_target)
         matching = matching * num_pred
 
         return matching

@@ -1,11 +1,11 @@
 import uotod
-from sample import input, target
+from uotod.sample import input, target
 
 L = uotod.loss.GIoULoss()
 
-H_unb_weak_constraints = uotod.match.UnbalancedSinkhorn(loc_match_cost=L, bg_cost=0.8, reg_pred=.1, reg_target=.1)
-H_unb_strong_constraints = uotod.match.UnbalancedSinkhorn(loc_match_cost=L, bg_cost=0.8, reg_pred=.5, reg_target=.5)
-H_balanced = uotod.match.BalancedSinkhorn(loc_match_cost=L, bg_cost=0.8)
+H_unb_weak_constraints = uotod.match.UnbalancedSinkhorn(loc_match_cost=L, background_cost=0.8, reg_pred=.1, reg_target=.1)
+H_unb_strong_constraints = uotod.match.UnbalancedSinkhorn(loc_match_cost=L, background_cost=0.8, reg_pred=.5, reg_target=.5)
+H_balanced = uotod.match.BalancedSinkhorn(loc_match_cost=L, background_cost=0.8)
 
 
 match_unb_weak_constraints = H_unb_weak_constraints(input, target)[0, :, :]

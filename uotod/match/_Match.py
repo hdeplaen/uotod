@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Union, List, Optional, Tuple
 from warnings import warn
-from numpy import array
+from numpy import ndarray
 
 import torch
 from torch import Tensor
@@ -38,7 +38,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
         assert isinstance(kwargs['cls_match_cost'], _Loss) or isinstance(kwargs['loc_match_cost'], _Loss), \
             "At least a localization or classification cost must be provided."
         assert isinstance(kwargs['background'], bool), 'The background argument must be set to either True or False.'
-        assert kwargs['background_cost'] >= 0., "The background cost must a non-negative float."
+        assert kwargs['background_cost'] >= 0., "The background cost must non-negative."
 
         self.matching_cls_module = kwargs['cls_match_cost']
         self.matching_loc_module = kwargs['loc_match_cost']
@@ -157,8 +157,9 @@ class _Match(nn.Module, metaclass=ABCMeta):
         cost_matrix = cost_matrix * target["mask"].unsqueeze(dim=1).expand(cost_matrix.shape)
 
         # Add the background cost.
-        if self.background: cost_matrix = torch.cat([cost_matrix, self.background_cost * torch.ones_like(cost_matrix[:, :, :1])],
-                                               dim=2)
+        if self.background:
+            cost_matrix = torch.cat([cost_matrix, self.background_cost * torch.ones_like(cost_matrix[:, :, :1])],
+                                    dim=2)
 
         return cost_matrix
 
@@ -236,18 +237,18 @@ class _Match(nn.Module, metaclass=ABCMeta):
         if target_mask is None:
             if self._individual:
                 for idx in range(cost_matrix.size(0)):
-                    self._compute_matching_apart(cost_matrix[idx, :, :],
-                                                 p[idx, :, :])
+                    p[idx, :, :] = self._compute_matching_apart(cost_matrix.select(0, idx),
+                                                                p.select(0, idx))
             else:
-                self._compute_matching_together(cost_matrix, p)
+                p = self._compute_matching_together(cost_matrix, p)
         else:
             if self._individual:
                 for idx in range(cost_matrix.size(0)):
-                    self._compute_matching_apart(cost_matrix[idx, :, :],
-                                                 p[idx, :, :],
-                                                 target_mask[idx, :])
+                    p[idx, :, :] = self._compute_matching_apart(cost_matrix.select(0, idx),
+                                                                p.select(0, idx),
+                                                                target_mask.select(0, idx))
             else:
-                self._compute_matching_together(cost_matrix, p, target_mask)
+                p = self._compute_matching_together(cost_matrix, p, target_mask)
         return p
 
     def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
@@ -260,7 +261,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
                                 **kwargs) -> Tensor:
         raise NotImplementedError
 
-    def plot(self, idx=0, img: Optional[Union[Tensor, array]] = None,
+    def plot(self, idx=0, img: Optional[Union[Tensor, ndarray]] = None,
              plot_cost: bool = True,
              plot_match: bool = True,
              max_background_match: float = 1.,
@@ -272,7 +273,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :param idx: Index of the image to be plotted.
         :type idx: int, optional
         :param img: Image to be plotted. If it is not None, the boxes plot is computed.
-        :type img: Tensor or array, optional
+        :type img: Tensor or ndarray, optional
         :param plot_cost: Plots the cost matrix between the predictions and the targets, including background.
         :type plot_cost: bool, optional
         :param plot_match: Plots the cost matrix between the predictions and the targets, including background.
@@ -293,7 +294,13 @@ class _Match(nn.Module, metaclass=ABCMeta):
 
         # IMAGE WITH BOXES
         if img is not None:
-            fig_img = image_with_boxes(img,
+            if isinstance(img, ndarray) or isinstance(img, Tensor):
+                img_loc = img
+            elif isinstance(img, list):
+                img_loc = img[idx]
+            else:
+                raise Exception("The img argument must be an ndarray or Tensor for one image or a list for multiple.")
+            fig_img = image_with_boxes(img_loc,
                                        self._last_input["pred_boxes"][idx, :, :],
                                        self._last_target["boxes"][idx, :, :],
                                        pred_mask, target_mask)

@@ -11,13 +11,13 @@ from ..utils import kwargs_decorator, extend_docstring
 class _Compiled(_Sinkhorn, metaclass=ABCMeta):
     r"""
     :param compiled: Indicates whether to use a compiled version of the algorithm or not. Defaults to False.
-    :param num_iter: Fixed number of iterations in Sinkhorn's algorithm. Defaults to 20.
+    :param num_iter: Fixed number of iterations in Sinkhorn's algorithm. Defaults to 50 (can easily be lowered without hindering the global convergence).
     :type compiled: bool, optional
     :type num_iter: int, optional
     """
 
     @kwargs_decorator({'compiled': False,
-                       'num_iter': 20})
+                       'num_iter': 50})
     def __init__(self, **kwargs):
         super(_Compiled, self).__init__(**kwargs)
         self.compiled = kwargs["compiled"]

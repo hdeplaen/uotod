@@ -15,3 +15,5 @@ TARGET_COLOR = 'cyclic'
 
 MATCH_CMAP = 'Greys'
 COST_CMAP = 'Oranges'
+
+IMG_SCALE = 1.

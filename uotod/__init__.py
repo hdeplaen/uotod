@@ -5,6 +5,7 @@ __status__ = "beta"
 __date__ = "September 2023"
 
 # IMPORTS
+from . import sample
 from . import match
 from . import plot
 from . import loss

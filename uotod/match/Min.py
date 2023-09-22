@@ -75,46 +75,45 @@ class Min(_Match):
         self._unmatched_to_background = val
 
     def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                **kwargs) -> None:
-        if self._target_to_prediction:  # each target is matched to the closest prediction
-            out_view.scatter_(0, cost_matrix[:, :-1].argmin(0, keepdim=True), 1)  # fills in the minima
-            if target_mask is not None:  # suppresses the match to masked targets
-                out_view[:, :-1] = torch.where(target_mask, out_view[:, :-1], 0)
-            if self._unmatched_to_background:  # unmatched predictions are matched towards the background
-                out_view[:, -1] = out_view[:, :-1].sum(dim=1).squeeze() == 0
-            else:  # uniform match (corresponds to the limit case)
-                num_predictions = cost_matrix.size(dim=0)
-                if target_mask is not None:
-                    num_targets = target_mask.sum(0)
-                    fill_value = (num_predictions - num_targets) / num_predictions
-                else:
-                    num_targets = cost_matrix.size(dim=1)
-                    fill_value = ((num_predictions - num_targets) / num_predictions)
-                out_view[:, -1] = fill_value
-        else:
-            if target_mask is not None:
-                torch.where(target_mask, cost_matrix[:, :-1], torch.inf)
-            out_view.scatter_(1, cost_matrix.argmin(1, keepdim=True), 1)
+                                **kwargs) -> Tensor:
+        raise NotImplementedError
 
     def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                   **kwargs) -> None:
-        if self.background:
-            cost_without_background = cost_matrix[:, :, :-1]
-            out_view_without_background = out_view[:, :, :-1]
-        else:
-            cost_without_background = cost_matrix[:, :, :]
-            out_view_without_background = out_view[:, :, :]
+                                   **kwargs) -> Tensor:
+        def get_cost(with_background=False) -> Tensor:
+            if not with_background and self.background:
+                return cost_matrix[:, :, :-1]
+            return cost_matrix
+
+        def get_view(with_background=False) -> Tensor:
+            if not with_background and self.background:
+                return out_view[:, :, :-1]
+            return out_view
+
+        def assign_cost(val: Tensor, with_background=False):
+            nonlocal cost_matrix
+            if not with_background and self.background:
+                cost_matrix[:, :, :-1] = val
+            else:
+                cost_matrix = val
+
+        def assign_view(val: Tensor, with_background=False):
+            nonlocal out_view
+            if not with_background and self.background:
+                out_view[:, :, :-1] = val
+            else:
+                out_view = val
 
         if self._target_to_prediction:  # each target is matched to the closest prediction
-            vals, idx = cost_without_background.min(1, keepdim=True)
-            idx_threshold = vals < self.threshold
-            out_view.scatter_(1, idx, 1)  # fills in the minima
-            out_view_without_background = torch.where(idx_threshold, out_view_without_background, 0)
+            vals, idx = get_cost(False).min(1, keepdim=True)
+            idx_threshold = vals > self.threshold
+            get_view(True).scatter_(1, idx, 1)  # fills in the minima
+            assign_view(get_view(False).where(idx_threshold, 0), False)
             if target_mask is not None:  # suppresses the match to masked targets
-                out_view_without_background = torch.where(target_mask, out_view_without_background, 0)
+                assign_view(get_view(False).where(target_mask.unsqueeze(1), 0), False)
             if self.background:
                 if self._unmatched_to_background:  # unmatched predictions are matched towards the background
-                    out_view_without_background = out_view_without_background.sum(dim=2).squeeze() == 0
+                    out_view[:,:,-1] = get_view(False).sum(dim=2).squeeze() == 0
                 else:  # uniform match (corresponds to the limit case)
                     num_predictions = cost_matrix.size(dim=1)
                     if target_mask is not None:
@@ -124,8 +123,14 @@ class Min(_Match):
                         num_targets = cost_matrix.size(dim=2)
                         num_batch = cost_matrix.size(dim=0)
                         fill_value = ((num_predictions - num_targets) / num_predictions).expand(num_batch)
-                    out_view_without_background = fill_value
+                    out_view[:,:,-1] = fill_value
+
         else:
             if target_mask is not None:
-                cost_without_background = torch.where(target_mask, cost_without_background, torch.inf)
-            out_view.scatter_(2, cost_matrix.argmin(2, keepdim=True), 1)
+                assign_cost(get_cost(False).where(target_mask.unsqueeze(1), torch.inf), False)
+            vals, idx = get_cost(True).min(2, keepdim=True)
+            idx_threshold = vals > self.threshold
+            get_view(True).scatter_(2, idx, 1)  # fills in the minima
+            assign_view(get_view(True).where(idx_threshold, 0), True)
+
+        return out_view

@@ -13,8 +13,6 @@ class BalancedSinkhorn(_Compiled):
 
     def __init__(self, **kwargs):
         super(BalancedSinkhorn, self).__init__(**kwargs)
-        # super(_BalancedSinkhorn, self).__init__(**kwargs)
-        # super(_Compiled, self).__init__(**kwargs)
 
     def _matching(self, hist_pred: Tensor, hist_tgt: Tensor, C: Tensor, reg: float) -> Tensor:
         return self._matching_method(hist_pred, hist_tgt, C, reg, self._num_iter)
@@ -38,7 +36,7 @@ class BalancedSinkhorn(_Compiled):
 
     def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
                                    **kwargs):
-        out_view[:,:,:] = self._matching_method(kwargs['hist_pred'],
+        return self._matching_method(kwargs['hist_pred'],
                                          kwargs['hist_target'],
                                          C=cost_matrix,
                                          reg=kwargs['reg'],
@@ -46,7 +44,7 @@ class BalancedSinkhorn(_Compiled):
 
     def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
                                 **kwargs):
-        out_view[:,:] = self._matching_method(kwargs['hist_pred'].unsqueeze(0),
+        return self._matching_method(kwargs['hist_pred'].unsqueeze(0),
                                          kwargs['hist_target'].unsqueeze(0),
                                          C=cost_matrix.unsqueeze(0),
                                          reg=kwargs['reg'],

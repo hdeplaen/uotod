@@ -4,7 +4,7 @@ from torch import Tensor, BoolTensor
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from .labels import target_labels, prediction_labels, target_colors, prediction_colors
-from .params import ANNOTATE, ALPHA_BOXES, ALPHA_IMAGE, FONT_SIZE, TARGET_FILLED, PREDICTION_FILLED
+from .params import ANNOTATE, ALPHA_BOXES, ALPHA_IMAGE, FONT_SIZE, TARGET_FILLED, PREDICTION_FILLED, IMG_SCALE
 
 
 def draw_box(ax, box, text=None, annotate=True, filled=False, color='black'):
@@ -56,7 +56,9 @@ def image_with_boxes(img, boxes_pred, boxes_target, mask_pred: Optional[BoolTens
 
     x_max, y_max, _ = img.shape
 
-    fig = plt.figure(frameon=False)
+    dpi = plt.rcParams['figure.dpi']
+    fig_size = (y_max / dpi * IMG_SCALE, x_max / dpi * IMG_SCALE)
+    fig = plt.figure(frameon=False, figsize=fig_size)
     if isinstance(img, Tensor):
         plt.imshow(img.cpu())
     else:

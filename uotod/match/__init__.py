@@ -1,6 +1,6 @@
 from .Hungarian import Hungarian
 from .Min import Min
-# from .SoftMin import SoftMin
+from .SoftMin import SoftMin
 from .BalancedSinkhorn import BalancedSinkhorn
 from .UnbalancedSinkhorn import UnbalancedSinkhorn
 from .BalancedPOT import BalancedPOT
