@@ -5,5 +5,5 @@
 uotod/compiled*
 .idea/
 build/
-docs/build
-docs/example
+docs/build/
+docs/example/

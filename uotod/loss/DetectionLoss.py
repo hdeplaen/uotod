@@ -1,3 +1,4 @@
+import warnings
 from typing import Union, Dict, List, Optional, Tuple
 
 import torch
@@ -20,6 +21,10 @@ class DetectionLoss(_Loss):
     :type matching_method: _Match
     :param bg_class_position: Index of the background class. "first", "last" or "none" (no background class).
     :type bg_class_position: str, optional
+    :param use_hard_negative_mining: Whether to use hard negative mining.
+    :type use_hard_negative_mining: bool, optional
+    :param neg_to_pos_ratio: Ratio of negative to positive samples to use when using hard negative mining.
+    :type neg_to_pos_ratio: float, optional
     :param size_average: Deprecated.
     :type size_average: bool, optional
     :param reduce: Deprecated.
@@ -31,12 +36,17 @@ class DetectionLoss(_Loss):
 
     .. note::
         To use multiple localization or classification loss terms, use the class :class:`uotod.loss.MultipleObjectiveLoss`.
+
     .. note::
-        For a cross-entropy loss, use bg_class_position="first" and loss_cls_module=CrossEntropyLoss().
+        The classification loss is averaged over the number of positive and negative samples, weighted by the
+        class weights. This follows the implementation of the cross-entropy loss with class weights in PyTorch.
 
-        For a binary cross-entropy loss, use bg_class_position="none" and loss_cls_module=BCEWithLogitsLoss().
+        Note that the number of negative samples is zero when using the focal loss, since there is no explicit
+        background class.
 
-        For a focal loss, use bg_class_position="none" and loss_cls_module=uotod.loss.FocalLoss().
+        When using Hard Negative Mining, the number of negative samples is not taken into account in the averaging,
+        for consistency with the SSD implementation.
+
     """
 
     def __init__(self,
@@ -44,6 +54,8 @@ class DetectionLoss(_Loss):
                  loc_loss_module: Union[MultipleObjectiveLoss, _Loss],
                  matching_method: _Match,
                  bg_class_position: str = "first",
+                 use_hard_negative_mining: bool = False,
+                 neg_to_pos_ratio: Optional[float] = None,
                  size_average=None,
                  reduce=None,
                  reduction: str = 'mean') -> None:
@@ -57,6 +69,13 @@ class DetectionLoss(_Loss):
         self.loss_cls_module = cls_loss_module
         self.loss_loc_module = loc_loss_module
         self.bg_class_position = bg_class_position
+
+        self.use_hard_negative_mining = use_hard_negative_mining
+        if self.use_hard_negative_mining:
+            assert neg_to_pos_ratio is not None, "neg_to_pos_ratio must be specified when using hard negative mining"
+        elif neg_to_pos_ratio is not None:
+            warnings.warn("neg_to_pos_ratio is ignored when not using hard negative mining")
+        self.neg_to_pos_ratio = neg_to_pos_ratio
 
     def forward(self,
                 input: Union[Dict[str, Tensor], List[Dict[str, Tensor]]],
@@ -90,45 +109,72 @@ class DetectionLoss(_Loss):
         Examples::
 
             >>> import torch
-            >>> from uotod.loss import DetectionLoss, NegativeProbLoss, GIoULoss
-            >>> from uotod.match import Hungarian
+            >>> from uotod.loss import DetectionLoss, NegativeProbLoss, GIoULoss, IoULoss
+            >>> from uotod.match import Hungarian, UnbalancedSinkhorn
             >>> # Define the matching method
-            >>> matching_method = Hungarian(cls_match_cost=NegativeProbLoss(reduction="none"),
-            >>>                             loc_match_cost=torch.nn.L1Loss(reduction="none"))
+            >>> matching_method = Hungarian(
+            >>>     cls_match_cost=NegativeProbLoss(reduction="none"),
+            >>>     loc_match_cost=torch.nn.L1Loss(reduction="none")
+            >>> )
             >>> # Define the loss function
-            >>> loss_fn = DetectionLoss(cls_loss_module=torch.nn.CrossEntropyLoss(reduction="none"),
-            >>>                         loc_loss_module=GIoULoss(reduction="none"),
-            >>>                         matching_method=matching_method)
+            >>> loss_fn = DetectionLoss(
+            >>>     cls_loss_module=torch.nn.CrossEntropyLoss(reduction="none"),
+            >>>     loc_loss_module=GIoULoss(reduction="none"),
+            >>>     matching_method=matching_method
+            >>> )
             >>> # Define the input
             >>> pred = {"pred_logits": torch.randn(2, 100, 21),
             >>>         "pred_boxes": torch.randn(2, 100, 4)}
             >>> # Define the target
-            >>> target = {"labels": torch.randint(1, 21, (2, 10)),  # 0 is the background class
-            >>>           "boxes": torch.randn(2, 10, 4),
-            >>>           "mask": torch.ones(2, 10)}
+            >>> target = {"labels": torch.randint(1, 21, (2, 10)),      # 0 is the background class
+            >>>           "boxes": torch.randn(2, 10, 4),               # (x1, y1, x2, y2)
+            >>>           "mask": torch.ones(2, 10, dtype=torch.bool)}  # Padding mask
             >>> # Compute the loss
             >>> loss_fn(pred, target)
-            tensor(3.4424)
 
             >>> # With anchors
             >>> anchors = torch.randn(100, 4)
             >>> # Define the matching method
-            >>> matching_method = Hungarian(cls_match_cost=NegativeProbLoss(reduction="none"),
-            >>>                             loc_match_cost=torch.nn.L1Loss(reduction="none"),
-            >>>                             is_anchor_based=True)
+            >>> matching_method = Hungarian(
+            >>>     cls_match_cost=None,                                # No classification cost for matching anchors
+            >>>     loc_match_cost=IoULoss(reduction="none"),
+            >>>     is_anchor_based=True                                # Use anchor-based matching
+            >>> )
             >>> # Define the loss function
-            >>> loss_fn = DetectionLoss(cls_loss_module=torch.nn.CrossEntropyLoss(reduction="none"),
-            >>>                         loc_loss_module=GIoULoss(reduction="none"),
-            >>>                         matching_method=matching_method)
+            >>> loss_fn = DetectionLoss(
+            >>>     cls_loss_module=torch.nn.CrossEntropyLoss(reduction="none"),
+            >>>     loc_loss_module=GIoULoss(reduction="none"),
+            >>>     matching_method=matching_method
+            >>> )
             >>> # Compute the loss
             >>> loss_fn(pred, target, anchors)
-            tensor(4.1399)
+
+            >>> # Using Unbalanced Optimal Transport and hard negative mining
+            >>> # Define the matching method
+            >>> matching_method = UnbalancedSinkhorn(
+            >>>     cls_match_cost=None,
+            >>>     loc_match_cost=IoULoss(reduction="none"),
+            >>>     reg_pred=1e+3,                                      # Regularization parameter for the predicted boxes
+            >>>     reg_target=1e-3,                                    # Regularization parameter for the target boxes
+            >>>     background_cost=0.5,                                # Threshold (IoU) for matching to background
+            >>>     is_anchor_based=True                                # Use anchor-based matching
+            >>> )
+            >>> # Define the loss function
+            >>> loss_fn = DetectionLoss(
+            >>>     cls_loss_module=torch.nn.CrossEntropyLoss(reduction="none"),
+            >>>     loc_loss_module=GIoULoss(reduction="none"),
+            >>>     matching_method=matching_method,
+            >>>     use_hard_negative_mining=True,                      # Use hard negative mining
+            >>>     neg_to_pos_ratio=3.                                 # Use 3 negative samples for 1 positive sample
+            >>> )
+            >>> # Compute the loss
+            >>> loss_fn(pred, target, anchors)
         """
         # Convert the target to dict of masked tensors, if necessary.
         if not isinstance(target, dict):
             target = convert_target_to_dict(target)
 
-        # Repeat the anchors to match the batch size.
+        # Repeat the anchors to match the batch size, if necessary.
         if anchors is not None and anchors.dim() == 2:
             anchors = anchors.unsqueeze(0).repeat(target['boxes'].shape[0], 1, 1)
 
@@ -139,24 +185,35 @@ class DetectionLoss(_Loss):
         cls_loss = self._compute_cls_losses(input['pred_logits'], target['labels'])  # (batch_size, num_pred, num_targets + 1)
         loc_loss = self._compute_loc_losses(input['pred_boxes'], target['boxes'])  # (batch_size, num_pred, num_targets)
 
-        # Mask the loss matrices.
+        # Mask the loss matrices with the padding mask.
         tgt_mask = target['mask'].unsqueeze(dim=1).expand(loc_loss.shape)
         cls_loss[..., :-1] = cls_loss[..., :-1] * tgt_mask
         loc_loss = loc_loss * tgt_mask
 
         # Compute the total loss.
-        # TODO: add option to use hard negative mining ?
-        cls_loss = (matching * cls_loss)
+        cls_loss_pos = (matching[..., :-1] * cls_loss[..., :-1])
+        cls_loss_neg = (matching[..., -1] * cls_loss[..., -1])
         loc_loss = (matching[..., :-1] * loc_loss)
+
+        # Hard negative mining.
+        print(f"matching.shape: {matching.shape},"
+              f" N_pos = {matching[..., :-1].sum(dim=(1, 2))}"
+              f" N_neg = {matching[..., -1].sum(dim=(1))}")
+        if self.use_hard_negative_mining:
+            cls_loss_neg = self._hard_negative_mining(cls_loss_neg, matching)
 
         # Average the loss terms.
         if self.reduction == 'mean':
             num_pos_weighted, num_neg_weighted = self._get_averaging_coefs(matching, target['labels'])
-            cls_loss_reduced = cls_loss.sum() / (num_pos_weighted + num_neg_weighted)
+            if self.use_hard_negative_mining:
+                cls_loss_reduced = (cls_loss_pos.sum() + cls_loss_neg.sum()) / num_pos_weighted
+            else:
+                cls_loss_reduced = (cls_loss_pos.sum() + cls_loss_neg.sum()) / (num_pos_weighted + num_neg_weighted)
             loc_loss_reduced = loc_loss.sum() / num_pos_weighted
+            print(f"num_pos_weighted = {num_pos_weighted}, num_neg_weighted = {num_neg_weighted}")
             return cls_loss_reduced + loc_loss_reduced
         elif self.reduction == 'sum':
-            cls_loss_reduced = cls_loss.sum()
+            cls_loss_reduced = (cls_loss_pos.sum() + cls_loss_neg.sum())
             loc_loss_reduced = loc_loss.sum()
             return cls_loss_reduced + loc_loss_reduced
         else:
@@ -177,6 +234,8 @@ class DetectionLoss(_Loss):
             - num_neg_weighted: the number of negative samples, weighted by the background class weight.
         :rtype: tuple of Tensors
         """
+        # FIXME: currently not compatible torch.nn.BCELoss() / torch.nn.BCELossWithLogits() weight parameter
+
         # Compute the weighting of the positive and negative classes.
         if hasattr(self.loss_cls_module, "weight") and self.loss_cls_module.weight is not None and \
                 self.bg_class_position == "first":
@@ -198,9 +257,37 @@ class DetectionLoss(_Loss):
         if self.bg_class_position == "none":
             num_neg_weighted = 0.
         else:
-            num_neg_weighted = matching[..., -1].sum() * neg_coef
+            num_neg_weighted = matching[..., -1].sum() * neg_coef  # (1,)
+
+        # Clamp the number of positive samples to 1, to avoid division by 0.
+        num_pos_weighted = torch.clamp(num_pos_weighted, min=1.)
 
         return num_pos_weighted, num_neg_weighted
+
+    def _hard_negative_mining(self, cls_loss_neg: Tensor, matching: Tensor) -> Tensor:
+        r"""
+        Performs hard negative mining.
+
+        :param cls_loss_neg: Classification loss for the negative samples. Tensor of shape (batch_size, num_pred).
+        :param matching: the matching between the predicted and target boxes. Tensor of shape
+            (batch_size, num_pred, num_targets+1).
+        :return: Classification loss for the negative samples after hard negative mining.
+        """
+
+        # Compute the maximum number of negative samples to keep.
+        max_num_negative = self.neg_to_pos_ratio * matching[..., :-1].sum(dim=(1, 2))
+
+        # Sort the negative samples by decreasing loss.
+        _, idx = cls_loss_neg.sort(1, descending=True)
+        matching_bg_sorted = torch.gather(matching[:, :, -1], dim=1, index=idx)
+
+        # Keep the max_num_negative negative samples with the highest loss.
+        cumulative_num_negative = torch.cumsum(matching_bg_sorted, dim=1)
+        background_idxs_unsorted = cumulative_num_negative < max_num_negative[:, None]
+        background_idxs = torch.gather(background_idxs_unsorted, dim=1, index=idx.sort(1)[1])
+        cls_loss_neg = cls_loss_neg[background_idxs]
+
+        return cls_loss_neg
 
     def _compute_cls_losses(self, pred_logits: Tensor, tgt_labels: Tensor) -> Tensor:
         r"""
@@ -271,7 +358,7 @@ class DetectionLoss(_Loss):
         # Compute the localization cost matrix.
         loc_loss = self.loss_loc_module(pred_locs_rep, tgt_locs_rep)
         if loc_loss.dim() == 2:
-            loc_loss = loc_loss.mean(dim=1)  # TODO: mean or sum reduction ?!
+            loc_loss = loc_loss.sum(dim=1)
         loc_loss = loc_loss.view(batch_size, num_pred, num_tgt)
 
         return loc_loss

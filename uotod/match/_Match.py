@@ -173,7 +173,6 @@ class _Match(nn.Module, metaclass=ABCMeta):
         if self.matching_cls_module is None:
             return None
 
-        # TODO: check if the function works OK for DETR, DEf-DETR, and SSD
         batch_size, num_pred, num_classes = pred_logits.shape
 
         num_tgt = tgt_classes.shape[1]
@@ -217,7 +216,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
         # Compute the localization cost matrix.
         loc_cost = self.matching_loc_module(pred_locs_rep, tgt_locs_rep)
         if loc_cost.dim() == 2:
-            loc_cost = loc_cost.mean(dim=1)  # TODO: mean or sum reduction ?!
+            loc_cost = loc_cost.sum(dim=1)
         loc_cost = loc_cost.view(batch_size, num_pred, num_tgt)
 
         return loc_cost

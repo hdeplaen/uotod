@@ -1,12 +1,41 @@
 import torch
 
+
 def convert_target_to_dict(target):
-    """Converts the annotations to a dict of tensors.
-    :target: list of annotations
+    r"""Converts COCO annotations to a dict of tensors.
+
+    :param target: list of annotations in the COCO format
+    :type target: list[dict]
     :returns: dict of tensors with padded annotations
         "boxes": tensor of shape (B, N, 4)
         "labels": tensor of shape (B, N)
         "mask": tensor of shape (B, N) with 1 for valid annotations and 0 for padded annotations
+        where B is the batch size and N is the maximum number of annotations in the batch.
+    :rtype: dict[str, torch.Tensor]
+
+    .. example::
+        >>> target = [
+        >>>     {
+        >>>         "boxes": torch.tensor([[0., 0., 1., 1.], [0., 0., 1., 1.]]),
+        >>>         "labels": torch.tensor([1, 2]),
+        >>>     },
+        >>>     {
+        >>>         "boxes": torch.tensor([[0., 0., 1., 1.], [0., 0., 1., 1.], [0., 0., 1., 1.]]),
+        >>>         "labels": torch.tensor([1, 2, 3]),
+        >>>     },
+        >>> ]
+        >>> convert_target_to_dict(target)
+        {'boxes': tensor([[[0., 0., 1., 1.],
+                           [0., 0., 1., 1.],
+                           [0., 0., 0., 0.]],
+                          [[0., 0., 1., 1.],
+                           [0., 0., 1., 1.],
+                           [0., 0., 1., 1.]]]),
+         'labels': tensor([[1, 2, 0],
+                           [1, 2, 3]]),
+         'mask': tensor([[ True,  True, False],
+                         [ True,  True,  True]])
+        }
     """
 
     device = target[0]['boxes'].device
