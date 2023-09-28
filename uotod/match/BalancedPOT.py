@@ -24,7 +24,7 @@ class BalancedPOT(_POT, _Sinkhorn):
     def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
                                 **kwargs):
         return self._matching_method(a=kwargs['hist_pred'],
-                                               b=kwargs['hist_target'],
-                                               M=cost_matrix,
-                                               reg=kwargs['reg'],
-                                               **self._method_kwargs)
+                                     b=kwargs['hist_target'],
+                                     M=cost_matrix,
+                                     reg=kwargs['reg'],
+                                     **self._method_kwargs)

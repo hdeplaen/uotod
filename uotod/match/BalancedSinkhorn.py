@@ -38,14 +38,14 @@ class BalancedSinkhorn(_Compiled):
                                    **kwargs):
         return self._matching_method(kwargs['hist_pred'],
                                          kwargs['hist_target'],
-                                         C=cost_matrix,
-                                         reg=kwargs['reg'],
-                                         num_iter=self.num_iter)
+                                         cost_matrix,
+                                         kwargs['reg'],
+                                         self.num_iter)
 
     def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
                                 **kwargs):
         return self._matching_method(kwargs['hist_pred'].unsqueeze(0),
                                          kwargs['hist_target'].unsqueeze(0),
-                                         C=cost_matrix.unsqueeze(0),
-                                         reg=kwargs['reg'],
-                                         num_iter=self.num_iter).squeeze(dim=0)
+                                         cost_matrix.unsqueeze(0),
+                                         kwargs['reg'],
+                                         self.num_iter).squeeze(dim=0)

@@ -27,12 +27,7 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
     def __init__(self, **kwargs):
         super(_Sinkhorn, self).__init__(**kwargs)
         self.reg = kwargs['reg']
-        self.reg_dimless = kwargs['reg_dimless']
-
-        assert self.reg is None or isinstance(self.reg, float), \
-            TypeError("The parameter reg must be a float or None.")
-        assert self.reg_dimless is None or isinstance(self.reg_dimless, float), \
-            TypeError("The parameter reg_dimless must be a float or None.")
+        self.reg_dimless = float(kwargs['reg_dimless'])
 
         assert isinstance(kwargs["normalize_cost_matrix"], bool), \
             TypeError("The argument normalize_cost_matrix must be a boolean.")

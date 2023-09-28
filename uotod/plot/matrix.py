@@ -69,7 +69,8 @@ def _multiple_matrices(ms: list,
                        title: Optional[str] = 'Match',
                        subtitles: Optional[List[str]] = None,
                        background: bool = True,
-                       subplots_disp: Optional[Tuple[int, int]] = None):
+                       subplots_disp: Optional[Tuple[int, int]] = None,
+                       figsize: Tuple[float, float] = (6.4, 4.8)):
     num = len(ms)
     assert num > 0, 'No example provided to plot.'
     if subplots_disp is not None:
@@ -87,7 +88,7 @@ def _multiple_matrices(ms: list,
     if subtitles is None:
         subtitles = [None] * num
 
-    fig, axs = plt.subplots(nrows, ncols, frameon=False, squeeze=False)
+    fig, axs = plt.subplots(nrows, ncols, frameon=False, squeeze=False, figsize=figsize)
     for idx in range(num):
         im = matrix(axs[idx//ncols, idx % ncols],
                     ms[idx], cmap, float(vmin), float(vmax),
@@ -102,10 +103,11 @@ def _multiple_matrices(ms: list,
 def multiple_matches(matches: list,
                      mask_pred: Optional[List[BoolTensor]] = None,
                      mask_target: Optional[List[BoolTensor]] = None,
-                     title: Optional[str] = 'Matches',
+                     title: Optional[str] = None,
                      subtitles: Optional[List[str]] = None,
                      background: bool = True,
-                     subplots_disp: Optional[Tuple[int, int]] = None):
+                     subplots_disp: Optional[Tuple[int, int]] = None,
+                     figsize: Tuple[float, float] = (6.4, 4.8)):
     r"""
     Stacks multiple results of the function match next to each other.
 
@@ -131,7 +133,8 @@ def multiple_matches(matches: list,
                               mask_target,
                               title, subtitles,
                               background,
-                              subplots_disp)
+                              subplots_disp,
+                              figsize)
 
 
 def multiple_costs(costs: list,
@@ -140,7 +143,8 @@ def multiple_costs(costs: list,
                    title: Optional[str] = 'Costs',
                    subtitles: Optional[List[str]] = None,
                    background: bool = True,
-                   subplots_disp: Optional[Tuple[int, int]] = None):
+                   subplots_disp: Optional[Tuple[int, int]] = None,
+                   figsize: Tuple[float, float] = (6.4, 4.8)):
     r"""
     Stacks multiple results of the function cost next to each other.
 
@@ -166,14 +170,16 @@ def multiple_costs(costs: list,
                               mask_target,
                               title, subtitles,
                               background,
-                              subplots_disp)
+                              subplots_disp,
+                              figsize)
 
 
 def cost(cost,
          mask_pred: Optional[BoolTensor] = None,
          mask_target: Optional[BoolTensor] = None,
          title: Optional[str] = 'Cost',
-         background: bool = True):
+         background: bool = True,
+         figsize: Tuple[float, float] = (6.4, 4.8)):
     r"""
     Generates the figure of the match as a matrix.
 
@@ -189,14 +195,15 @@ def cost(cost,
     :type background: bool, optional
     :return: Figure (matplotlib)
     """
-    return multiple_costs([cost], mask_pred, mask_target, title, None, background, (1,1))
+    return multiple_costs([cost], mask_pred, mask_target, title, None, background, (1,1), figsize)
 
 
 def match(match,
           mask_pred: Optional[BoolTensor] = None,
           mask_target: Optional[BoolTensor] = None,
           title: Optional[str] = 'Cost',
-          background: bool = True):
+          background: bool = True,
+          figsize: Tuple[float, float] = (6.4, 4.8)):
     r"""
     Generates the figure of the match of the cost as a matrix.
 
@@ -212,4 +219,4 @@ def match(match,
     :type background: bool, optional
     :return: Figure (matplotlib)
     """
-    return multiple_matches([match], mask_pred, mask_target, title, None, background, (1,1))
+    return multiple_matches([match], mask_pred, mask_target, title, None, background, (1,1), figsize)

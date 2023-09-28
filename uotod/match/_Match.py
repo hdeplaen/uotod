@@ -14,20 +14,20 @@ from ..plot import image_with_boxes, match, cost
 
 class _Match(nn.Module, metaclass=ABCMeta):
     r"""
-    :param cls_match_cost: Classification loss used to compute the matching, if any.
-    :param loc_match_cost: Localization loss used to compute the matching, if any.
+    :param cls_match_module: Classification loss used to compute the matching, if any.
+    :param loc_match_module: Localization loss used to compute the matching, if any.
     :param background: Indicates whether there is a background. Defaults to True.
     :param background_cost: Cost of the background class. Defaults to 10.
     :param is_anchor_based: If True, the matching is performed between the anchor boxes and the target boxes.
-    :type cls_match_cost: _Loss
-    :type loc_match_cost: _Loss
+    :type cls_match_module: _Loss
+    :type loc_match_module: _Loss
     :type background: bool, optional
     :type background_cost: float, optional
     :type is_anchor_based: bool, optional
     """
 
-    @kwargs_decorator({'cls_match_cost': None,
-                       'loc_match_cost': None,
+    @kwargs_decorator({'cls_match_module': None,
+                       'loc_match_module': None,
                        'background': True,
                        'background_cost': 10.0,
                        'is_anchor_based': False,
@@ -35,13 +35,16 @@ class _Match(nn.Module, metaclass=ABCMeta):
     def __init__(self, **kwargs) -> None:
         super(_Match, self).__init__()
 
-        assert isinstance(kwargs['cls_match_cost'], _Loss) or isinstance(kwargs['loc_match_cost'], _Loss), \
-            "At least a localization or classification cost must be provided."
         assert isinstance(kwargs['background'], bool), 'The background argument must be set to either True or False.'
         assert kwargs['background_cost'] >= 0., "The background cost must non-negative."
 
-        self.matching_cls_module = kwargs['cls_match_cost']
-        self.matching_loc_module = kwargs['loc_match_cost']
+        self.matching_cls_module = kwargs['cls_match_module']
+        self.matching_loc_module = kwargs['loc_match_module']
+
+        if self.matching_cls_module is not None:
+            if self.matching_cls_module.reduction != 'none': raise ValueError("The classification cost module must have a reduction set to 'none'.")
+        if self.matching_loc_module is not None:
+            if self.matching_loc_module.reduction != 'none': raise ValueError("The localization cost module must have a reduction set to 'none'.")
 
         self.background = kwargs['background']
         self.background_cost = kwargs['background_cost']
@@ -53,7 +56,9 @@ class _Match(nn.Module, metaclass=ABCMeta):
     def forward(self,
                 input: Union[Dict[str, Tensor], List[Dict[str, Tensor]]],
                 target: Union[Dict[str, Tensor], List[Dict[str, Tensor]]],
-                anchors: Optional[Tensor] = None, returns_cost: bool = False) \
+                anchors: Optional[Tensor] = None,
+                cost_matrix: Optional[Tensor] = None,
+                save: bool= True) \
             -> Union[Tensor, Tuple[Tensor, Tensor]]:
         r"""
         Computes a batch of matchings between the predicted and target boxes.
@@ -83,7 +88,8 @@ class _Match(nn.Module, metaclass=ABCMeta):
         self._last_target = None
 
         # Compute the cost matrix
-        cost_matrix = self.compute_cost_matrix(input, target, anchors)
+        if cost_matrix is None:
+            cost_matrix = self.compute_cost_matrix(input, target, anchors)
 
         # Compute the matching.
         matching = self.compute_matching(cost_matrix, target["mask"])
@@ -93,13 +99,12 @@ class _Match(nn.Module, metaclass=ABCMeta):
             raise RuntimeError("The matching is NaN, this may be caused by a too low regularization parameter.")
 
         # saving for the plotting
-        self._last_cost = cost_matrix
-        self._last_match = matching
-        self._last_input = input
-        self._last_target = target
+        if save:
+            self._last_cost = cost_matrix
+            self._last_match = matching
+            self._last_input = input
+            self._last_target = target
 
-        if returns_cost:
-            return matching, cost_matrix
         return matching
 
     def compute_cost_matrix(self,
@@ -151,7 +156,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
         elif loc_cost is None:
             cost_matrix = cls_cost
         else:
-            raise Exception("Both localization and classification costs are undefined.")
+            raise ValueError("Both localization and classification costs are undefined.")
 
         # Mask the cost matrix.
         cost_matrix = cost_matrix * target["mask"].unsqueeze(dim=1).expand(cost_matrix.shape)
@@ -170,6 +175,9 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :param tgt_classes: Target classes. Tensor of shape (batch_size, num_targets).
         :return: the classification cost matrix. Tensor of shape (batch_size, num_pred, num_classes).
         """
+        if self.matching_loc_module is None and self.matching_cls_module is None:
+            raise ValueError("At least a classification or a localization loss module must be provided.")
+
         if self.matching_cls_module is None:
             return None
 
@@ -263,8 +271,9 @@ class _Match(nn.Module, metaclass=ABCMeta):
     def plot(self, idx=0, img: Optional[Union[Tensor, ndarray]] = None,
              plot_cost: bool = True,
              plot_match: bool = True,
-             max_background_match: float = 1.,
-             background: bool = True):
+             max_background_match: Union[float, int] = 1.,
+             background: bool = True,
+             erase: bool = False):
         r"""
         Plots from the last batch
         # TODO: extensive description
@@ -284,7 +293,16 @@ class _Match(nn.Module, metaclass=ABCMeta):
         :return: Matplotlib figures
         :rtype: Tuple(fig, fig, fig)
         """
+        exception = Exception(
+            'The model has saved no values to plot. Insure that forward has been called at least once with the save argument set to True (by default).')
+
+        assert self._last_match is not None, exception
+        assert self._last_target is not None, exception
+        assert self._last_cost is not None, exception
+        assert self._last_input is not None, exception
+
         if not self.background:
+            warn('Cannot plot the background class as the model does not contain one')
             background = False
 
         matching_matrix = self._last_match[idx, :, :]
@@ -318,5 +336,12 @@ class _Match(nn.Module, metaclass=ABCMeta):
             fig_match = match(matching_matrix, pred_mask, target_mask, background=background)
         else:
             fig_match = None
+
+        if erase:
+            self._last_cost = None
+            self._last_match = None
+            self._last_input = None
+            self._last_target = None
+
 
         return fig_img, fig_cost, fig_match

@@ -18,17 +18,13 @@ class UnbalancedSinkhorn(_Compiled):
     _compiled_name = 'unbalanced'
 
     @kwargs_decorator({'reg_pred': 1.,
-                       'reg_target': 1.})
+                       'reg_target': 1.,
+                       'num_iter': 70})
     def __init__(self, **kwargs) -> None:
         super(UnbalancedSinkhorn, self).__init__(**kwargs)
 
-        self.reg_pred = kwargs['reg_pred']
-        self.reg_target = kwargs['reg_target']
-
-        assert isinstance(self.reg_pred, float), \
-            TypeError("The parameter reg_pred must be a float.")
-        assert isinstance(self.reg_target, float), \
-            TypeError("The parameter reg_target must be a float.")
+        self.reg_pred = float(kwargs['reg_pred'])
+        self.reg_target = float(kwargs['reg_target'])
 
     def _matching(self, hist_pred: Tensor, hist_ttarget: Tensor, C: Tensor) -> Tensor:
         return self._matching_method(hist_pred, hist_ttarget, C, self.reg, self._num_iter, self.reg_target,

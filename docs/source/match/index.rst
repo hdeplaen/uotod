@@ -24,5 +24,6 @@ Different Strategies
     hungarian
     balanced
     unbalanced
+    softmin
     balanced_pot
     unbalanced_pot

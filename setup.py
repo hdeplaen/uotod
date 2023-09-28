@@ -1,6 +1,5 @@
 from setuptools import setup
 import pathlib
-import pkg_resources
 import uotod
 import sys
 import platform

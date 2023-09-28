@@ -113,17 +113,12 @@ class Min(_Match):
                 assign_view(get_view(False).where(target_mask.unsqueeze(1), 0), False)
             if self.background:
                 if self._unmatched_to_background:  # unmatched predictions are matched towards the background
-                    out_view[:,:,-1] = get_view(False).sum(dim=2).squeeze() == 0
+                    out_view[:, :, -1] = get_view(False).sum(dim=2).squeeze() == 0
                 else:  # uniform match (corresponds to the limit case)
-                    num_predictions = cost_matrix.size(dim=1)
-                    if target_mask is not None:
-                        num_targets = target_mask.sum(1)
-                        fill_value = (num_predictions - num_targets) / num_predictions
-                    else:
-                        num_targets = cost_matrix.size(dim=2)
-                        num_batch = cost_matrix.size(dim=0)
-                        fill_value = ((num_predictions - num_targets) / num_predictions).expand(num_batch)
-                    out_view[:,:,-1] = fill_value
+                    num_predictions = cost_matrix.size(1)
+                    num_unmatched = num_predictions - get_view(False).sum(dim=2).sum(dim=1)
+                    fill_value = num_unmatched / num_predictions
+                    out_view[:, :, -1] = fill_value.unsqueeze(1)
 
         else:
             if target_mask is not None:
@@ -132,5 +127,7 @@ class Min(_Match):
             idx_threshold = vals > self.threshold
             get_view(True).scatter_(2, idx, 1)  # fills in the minima
             assign_view(get_view(True).where(idx_threshold, 0), True)
+            if self.background and self._unmatched_to_background:  # unmatched predictions are matched towards the background
+                out_view[:, :, -1] = get_view(False).sum(dim=2).squeeze() == 0
 
         return out_view

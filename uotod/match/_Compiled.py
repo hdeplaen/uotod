@@ -17,7 +17,7 @@ class _Compiled(_Sinkhorn, metaclass=ABCMeta):
     """
 
     @kwargs_decorator({'compiled': False,
-                       'num_iter': 50})
+                       'num_iter': 20})
     def __init__(self, **kwargs):
         super(_Compiled, self).__init__(**kwargs)
         self.compiled = kwargs["compiled"]
