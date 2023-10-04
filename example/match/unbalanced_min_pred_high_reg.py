@@ -23,5 +23,5 @@ fig_matches = uotod.plot.multiple_matches(matches=matches,
                                                      'Unbalanced Sink.\n(high reg_target)',
                                                      'Balanced\nSinkhorn'],
                                           title='Effect of reg_target (reg=0.1)',
-                                          figsize=(20, 7))
+                                          figsize=(20, 6))
 fig_matches.show()

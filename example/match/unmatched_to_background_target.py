@@ -23,5 +23,5 @@ fig_matches = uotod.plot.multiple_matches(matches=matches,
                                                      'Unbalanced Sinkhorn\n(low reg_pred)',
                                                      'Minimum from the targets\n(unmatched_to_background=True)'],
                                           title='Influence of the unmatched_to_background argument',
-                                          figsize=(24, 7))
+                                          figsize=(20, 5))
 fig_matches.show()

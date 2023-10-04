@@ -26,5 +26,5 @@ fig_matches = uotod.plot.multiple_matches(matches=matches,
                                                      'Balanced\nSinkhorn',
                                                      'Hungarian\nAlgorithm'],
                                           title='Effect of reg_pred (reg=0.01)',
-                                          figsize=(24, 7))
+                                          figsize=(20, 6))
 fig_matches.show()
