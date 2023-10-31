@@ -7,11 +7,11 @@ BACKGROUND_COST = 0.8               # background cost
 NUM_ITER = 100                      # number of iterations for Sinkhorn's algorithm (increased to ensure total convergence)
 L = uotod.loss.GIoULoss(reduction='none')           # GIoU loss between the predictions and the targets (no classes taken into account)
 
-M_00 = uotod.match.Min(loc_match_module=L, background_cost=BACKGROUND_COST, source='prediction')
+M_00 = uotod.match.ClosestTarget(loc_match_module=L, background_cost=BACKGROUND_COST)
 M_01 = uotod.match.UnbalancedSinkhorn(loc_match_module=L, background_cost=BACKGROUND_COST, reg=REG_LOW, reg_target=0.2, reg_pred=50., num_iter=NUM_ITER)
 M_02 = uotod.match.Hungarian(loc_match_module=L, background_cost=BACKGROUND_COST)
 M_03 = uotod.match.UnbalancedSinkhorn(loc_match_module=L, background_cost=0.8, reg=REG_LOW, reg_target=100., reg_pred=0.1)
-M_04 = uotod.match.Min(loc_match_module=L, background_cost=BACKGROUND_COST, source='target')
+M_04 = uotod.match.ClosestPrediction(loc_match_module=L, background_cost=BACKGROUND_COST)
 
 M_10 = uotod.match.SoftMin(loc_match_module=L, background_cost=BACKGROUND_COST, reg=REG_HIGH, source='prediction')
 M_11 = uotod.match.UnbalancedSinkhorn(loc_match_module=L, background_cost=BACKGROUND_COST, reg=REG_HIGH, reg_target=0.2, reg_pred=50., num_iter=NUM_ITER)
@@ -34,11 +34,11 @@ m_14 = M_14(input, target)[0, :, :]
 fig = uotod.plot.multiple_matches([m_00, m_01, m_02, m_03, m_04,
                                    m_10, m_11, m_12, m_13, m_14],
                                   title="",
-                                  subtitles=['Mininum from\nthe predictions',
+                                  subtitles=['Closest\nTarget',
                                              f"Unbalanced\nSinkhorn",
                                              "Hungarian\nAlgorithm",
                                              f"Unbalanced\nSinkhorn",
-                                             'Mininum from\nthe targets',
+                                             'Closest\nPrediction',
                                              "SoftMin from\nthe predictions",
                                              f"Unbalanced\nSinkhorn",
                                              f"Balanced\nSinkhorn",

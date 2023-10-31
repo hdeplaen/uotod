@@ -2,8 +2,8 @@ import uotod
 from uotod.sample import input, target, imgs
 
 L = uotod.loss.GIoULoss(reduction='none')
-M1 = uotod.match.Min(source='prediction')
-M2 = uotod.match.Min(source='target')
+M1 = uotod.match.ClosestPrediction()
+M2 = uotod.match.ClosestPrediction()
 M = uotod.match.WeightedSum(loc_match_module=L, background_cost=.8, matching_modules=[M1, M2])
 
 M(input, target)

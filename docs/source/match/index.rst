@@ -24,7 +24,9 @@ Different Strategies
     hungarian
     balanced
     unbalanced
-    minimum
+    closest_prediction
+    closest_target
+    min
     softmin
     balanced_pot
     unbalanced_pot
