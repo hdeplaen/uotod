@@ -111,10 +111,11 @@ class DetectionLoss(_Loss):
             >>> import torch
             >>> from uotod.loss import DetectionLoss, NegativeProbLoss, GIoULoss, IoULoss
             >>> from uotod.match import Hungarian, UnbalancedSinkhorn
+            >>> from uotod.utils import box_cxcywh_to_xyxy
             >>> # Define the matching method
             >>> matching_method = Hungarian(
-            >>>     cls_match_cost=NegativeProbLoss(reduction="none"),
-            >>>     loc_match_cost=torch.nn.L1Loss(reduction="none")
+            >>>     cls_match_module=NegativeProbLoss(reduction="none"),
+            >>>     loc_match_module=torch.nn.L1Loss(reduction="none")
             >>> )
             >>> # Define the loss function
             >>> loss_fn = DetectionLoss(
@@ -124,20 +125,20 @@ class DetectionLoss(_Loss):
             >>> )
             >>> # Define the input
             >>> pred = {"pred_logits": torch.randn(2, 100, 21),
-            >>>         "pred_boxes": torch.randn(2, 100, 4)}
+            >>>         "pred_boxes": box_cxcywh_to_xyxy(torch.rand(2, 100, 4))}
             >>> # Define the target
             >>> target = {"labels": torch.randint(1, 21, (2, 10)),      # 0 is the background class
-            >>>           "boxes": torch.randn(2, 10, 4),               # (x1, y1, x2, y2)
+            >>>           "boxes": box_cxcywh_to_xyxy(torch.rand(2, 10, 4)),                # (x1, y1, x2, y2)
             >>>           "mask": torch.ones(2, 10, dtype=torch.bool)}  # Padding mask
             >>> # Compute the loss
             >>> loss_fn(pred, target)
 
             >>> # With anchors
-            >>> anchors = torch.randn(100, 4)
+            >>> anchors = box_cxcywh_to_xyxy(torch.rand(100, 4))
             >>> # Define the matching method
             >>> matching_method = Hungarian(
-            >>>     cls_match_cost=None,                                # No classification cost for matching anchors
-            >>>     loc_match_cost=IoULoss(reduction="none"),
+            >>>     cls_match_module=None,                                # No classification cost for matching anchors
+            >>>     loc_match_module=IoULoss(reduction="none"),
             >>>     is_anchor_based=True                                # Use anchor-based matching
             >>> )
             >>> # Define the loss function
@@ -152,8 +153,8 @@ class DetectionLoss(_Loss):
             >>> # Using Unbalanced Optimal Transport and hard negative mining
             >>> # Define the matching method
             >>> matching_method = UnbalancedSinkhorn(
-            >>>     cls_match_cost=None,
-            >>>     loc_match_cost=IoULoss(reduction="none"),
+            >>>     cls_match_module=None,
+            >>>     loc_match_module=IoULoss(reduction="none"),
             >>>     reg_pred=1e+3,                                      # Regularization parameter for the predicted boxes
             >>>     reg_target=1e-3,                                    # Regularization parameter for the target boxes
             >>>     background_cost=0.5,                                # Threshold (IoU) for matching to background
@@ -196,9 +197,6 @@ class DetectionLoss(_Loss):
         loc_loss = (matching[..., :-1] * loc_loss)
 
         # Hard negative mining.
-        print(f"matching.shape: {matching.shape},"
-              f" N_pos = {matching[..., :-1].sum(dim=(1, 2))}"
-              f" N_neg = {matching[..., -1].sum(dim=(1))}")
         if self.use_hard_negative_mining:
             cls_loss_neg = self._hard_negative_mining(cls_loss_neg, matching)
 
@@ -210,7 +208,6 @@ class DetectionLoss(_Loss):
             else:
                 cls_loss_reduced = (cls_loss_pos.sum() + cls_loss_neg.sum()) / (num_pos_weighted + num_neg_weighted)
             loc_loss_reduced = loc_loss.sum() / num_pos_weighted
-            print(f"num_pos_weighted = {num_pos_weighted}, num_neg_weighted = {num_neg_weighted}")
             return cls_loss_reduced + loc_loss_reduced
         elif self.reduction == 'sum':
             cls_loss_reduced = (cls_loss_pos.sum() + cls_loss_neg.sum())
@@ -235,21 +232,22 @@ class DetectionLoss(_Loss):
         :rtype: tuple of Tensors
         """
         # FIXME: currently not compatible torch.nn.BCELoss() / torch.nn.BCELossWithLogits() weight parameter
-
         # Compute the weighting of the positive and negative classes.
         if hasattr(self.loss_cls_module, "weight") and self.loss_cls_module.weight is not None and \
                 self.bg_class_position == "first":
-            pos_coefs = self.loss_cls_module.weight[1:][tgt_labels]  # (batch_size, num_targets)
+            pos_coefs = self.loss_cls_module.weight[tgt_labels]  # (batch_size, num_targets)
+            # old : pos_coefs = self.loss_cls_module.weight[1:][tgt_labels]
             neg_coef = self.loss_cls_module.weight[0]
         elif hasattr(self.loss_cls_module, "weight") and self.loss_cls_module.weight is not None and \
                 self.bg_class_position == "last":
-            pos_coefs = self.loss_cls_module.weight[:-1][tgt_labels]  # (batch_size, num_targets)
+            pos_coefs = self.loss_cls_module.weight[tgt_labels]  # (batch_size, num_targets)
+            # old : pos_coefs = self.loss_cls_module.weight[:-1][tgt_labels]
             neg_coef = self.loss_cls_module.weight[-1]
         else:
             pos_coefs = 1.
             neg_coef = 1.
 
-        # Compute the number of positive samples.
+        # Compute the number of positive samples: sum of the matching matrix, weighted by the gt class weights.
         num_pos_weighted = matching[..., :-1].sum(dim=1) * pos_coefs  # (batch_size, num_targets)
         num_pos_weighted = num_pos_weighted.sum()  # (1,)
 
@@ -261,6 +259,7 @@ class DetectionLoss(_Loss):
 
         # Clamp the number of positive samples to 1, to avoid division by 0.
         num_pos_weighted = torch.clamp(num_pos_weighted, min=1.)
+        print(f"num_pos_weighted: {num_pos_weighted}, num_neg_weighted: {num_neg_weighted}")
 
         return num_pos_weighted, num_neg_weighted
 
@@ -328,7 +327,7 @@ class DetectionLoss(_Loss):
             tgt_classes_rep = tgt_classes_rep.view(batch_size * num_pred * (num_tgt + 1), num_classes)
         else:
             tgt_classes_rep = torch.full((batch_size, num_pred, num_tgt + 1), fill_value=bg_class_index,
-                                         dtype=torch.int64, device=tgt_labels.device)
+                                         dtype=torch.long, device=tgt_labels.device)
             tgt_classes_rep[..., :num_tgt] = tgt_labels.unsqueeze(dim=1).expand(batch_size, num_pred, num_tgt)
             tgt_classes_rep = tgt_classes_rep.view(batch_size * num_pred * (num_tgt + 1))
 

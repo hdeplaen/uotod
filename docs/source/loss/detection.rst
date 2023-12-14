@@ -5,7 +5,7 @@ Detection Loss
 This module contains the loss function for object detection.
 The loss function is computed in two steps:
 
-1. A match :math:`\mathbf{P}` is determined between predicted and ground truth boxes. The match is computed by the **matching_method** module.
+1. A match :math:`\mathbf{P}` is determined between predicted and ground truth boxes. The match is computed by the **matching_method** module. See the `Matching Strategies <../match>`_ section for more details.
 2. The loss is calculated as a weighed sum of the classification and bounding box regression losses: :math:`\mathcal{L}_{\text{train}}(\hat{\mathbf{y}}_i,\mathbf{y}_j) = \mathcal{L}_{\text{classification}}(\hat{\mathbf{c}}_i,\mathbf{c}_j) + \mathcal{L}_{\text{localization}}(\hat{\mathbf{b}}_i,\mathbf{b}_j)` between the :math:`N_p` predictions :math:`\hat{\mathbf{y}}_i` and :math:`N_g` targets :math:`\mathbf{y}_j`. The particular training loss for the background ground truth includes only a classification term :math:`\mathcal{L}_{\text{train}}(\hat{\mathbf{y}}_i,\varnothing) = \mathcal{L}_{\text{classification}}(\hat{\mathbf{c}}_i,\varnothing)`.
 
 .. math::

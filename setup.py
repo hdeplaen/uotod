@@ -1,5 +1,6 @@
 from setuptools import setup
 import pathlib
+import pkg_resources  # TODO: remove dependency
 import uotod
 import sys
 import platform

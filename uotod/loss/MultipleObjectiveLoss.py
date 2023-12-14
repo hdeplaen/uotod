@@ -15,8 +15,8 @@ class MultipleObjectiveLoss(_Loss):
 
     :param losses: list of losses, with reduction="none" for all losses
     :type losses: List[_Loss]
-    :param coefficients: list of coefficients for the losses
-    :type coefficients: List[float]
+    :param weights: list of weights for the losses
+    :type weights: List[float]
     :return: weighted sum of the losses
     :rtype: Tensor (float)
 
@@ -29,13 +29,13 @@ class MultipleObjectiveLoss(_Loss):
         >>> )
     """
 
-    def __init__(self, losses: List[_Loss] = None, coefficients: List[float] = None) -> None:
+    def __init__(self, losses: List[_Loss] = None, weights: List[float] = None) -> None:
         super().__init__()
 
-        assert len(losses) == len(coefficients), "The number of losses and weights must be the same."
+        assert len(losses) == len(weights), "The number of losses and weights must be the same."
         assert all([loss.reduction == "none" for loss in losses]), \
             "The reduction of the losses must be none."
-        assert all([weight >= 0. for weight in coefficients]), "The coefficients must be non-negative."
+        assert all([weight >= 0. for weight in weights]), "The coefficients must be non-negative."
 
         for loss in losses:
             # check if "weight" is a parameter of the loss (for classification losses)
@@ -46,7 +46,8 @@ class MultipleObjectiveLoss(_Loss):
                 break
 
         self.losses = losses
-        self.coefficients = coefficients
+        self.coefficients = weights
+        self.reduction = "none"  # the reduction is always "none" for this loss
 
     def __repr__(self):
         return f"MultipleObjectiveLoss(losses={self.losses}, weights={self.coefficients})"
@@ -64,6 +65,10 @@ class MultipleObjectiveLoss(_Loss):
 
         loss = torch.zeros(input.shape[0], device=input.device, dtype=torch.float)
         for loss_fn, w in zip(self.losses, self.coefficients):
-            loss += w * loss_fn(input, target)
+            loss_ = loss_fn(input, target)
+            # sum over all dimensions except the batch dimension
+            if loss_.dim() > 1:
+                loss_ = loss_.sum(dim=tuple(range(1, loss_.dim())))
+            loss += w * loss_
 
         return loss

@@ -22,24 +22,24 @@ During training, supervised object detection tries to correctly match the predic
 OT matching with GIoU loss:
 
 ```python
-from uotod.match import OTMatching
-from uotod.loss.modules import GIoULoss
+from uotod.match import BalancedSinkhorn
+from uotod.loss import GIoULoss
 
-ot = OTMatching(
-    loc_matching_module=GIoULoss(reduction="none"),
-    bg_cost=0.,
+ot = BalancedSinkhorn(
+    loc_match_module=GIoULoss(reduction="none"),
+    background_cost=0.,
 )
 ```
 
 Hungarian matching (bipartite) with GIoU loss:
 
 ```python
-from uotod.match import HungarianMatching
-from uotod.loss.modules import GIoULoss
+from uotod.match import Hungarian
+from uotod.loss import GIoULoss
 
-hungarian = HungarianMatching(
-    loc_matching_module=GIoULoss(reduction="none"),
-    bg_cost=0.,
+hungarian = Hungarian(
+    loc_match_module=GIoULoss(reduction="none"),
+    background_cost=0.,
 )
 ```
 
@@ -48,16 +48,15 @@ Loss from SSD solved with Unbalanced Optimal Transport:
 ```python
 from torch.nn import L1Loss, CrossEntropyLoss
 
-from uotod.match import OTMatching
-from uotod.loss import DetectionLoss
-from uotod.loss.modules import IoULoss
+from uotod.match import UnbalancedSinkhorn
+from uotod.loss import DetectionLoss, IoULoss
 
-matching_method = OTMatching(
-    cls_matching_module=None,  # No classification cost
-    loc_matching_module=IoULoss(reduction="none"),
-    bg_cost=0.5,  # Threshold for matching to background
+matching_method = UnbalancedSinkhorn(
+    cls_match_module=None,  # No classification cost
+    loc_match_module=IoULoss(reduction="none"),
+    background_cost=0.5,  # Threshold for matching to background
     is_anchor_based=True,  # Use anchor-based matching
-    ot_tau2=1e-3,  # Relax the constraint that each ground truth is matched to exactly one prediction
+    reg_target=1e-3,  # Relax the constraint that each ground truth is matched to exactly one prediction
 )
 
 loss = DetectionLoss(
@@ -79,17 +78,17 @@ Loss from DETR solved with Optimal Transport (num_classes=3):
 import torch
 from torch.nn import L1Loss, CrossEntropyLoss
 
-from uotod.match import OTMatching
+from uotod.match import BalancedSinkhorn
 from uotod.loss import DetectionLoss
-from uotod.loss.modules import MultipleObjectiveLoss, GIoULoss, SoftmaxNegLoss
+from uotod.loss import MultipleObjectiveLoss, GIoULoss, NegativeProbLoss
 
-matching_method = OTMatching(
-    cls_matching_module=SoftmaxNegLoss(reduction="none"),
-    loc_matching_module=MultipleObjectiveLoss(
+matching_method = BalancedSinkhorn(
+    cls_match_module=NegativeProbLoss(reduction="none"),
+    loc_match_module=MultipleObjectiveLoss(
         losses=[GIoULoss(reduction="none"), L1Loss(reduction="none")],
-        coefficients=[1., 5.],
+        weights=[1., 5.],
     ),
-    bg_cost=0.,  # Does not influence the matching when using balanced OT
+    background_cost=0.,  # Does not influence the matching when using balanced OT
 )
 
 loss = DetectionLoss(
@@ -100,7 +99,7 @@ loss = DetectionLoss(
     ),
     loc_loss_module=MultipleObjectiveLoss(
         losses=[GIoULoss(reduction="none"), L1Loss(reduction="none")],
-        coefficients=[1., 5.],
+        weights=[1., 5.],
     ),
 )
 

@@ -7,6 +7,9 @@ class NegativeProbLoss(_Loss):
     r"""
     Creates a criterion that computes the negative probability of the target class.
 
+    .. math::
+        \text{loss}(x, y) = -softmax(x)[y]
+
     :param reduction: reduction method
     :type reduction: str, optional
     """

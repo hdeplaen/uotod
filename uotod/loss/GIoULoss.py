@@ -1,21 +1,22 @@
 from torch import Tensor
-from torchvision.ops import generalized_box_iou_loss
 from torch.nn.modules.loss import _Loss
+from torchvision.ops.boxes import generalized_box_iou
 
 
 class GIoULoss(_Loss):
     r"""
     Creates a criterion that measures the generalized IoU loss between each predicted box and target box.
 
-    It is a wrapper around the `generalized_box_iou_loss` function from the `torchvision` package.
+    .. math::
+        \text{loss} = 1 - \text{GIoU}
 
-    :param reduction: Specifies the reduction to apply to the output:
+    :param reduction: Specifies the reduction to apply to the output: 'none' | 'mean' | 'sum'.
     :type reduction: str, optional
     """
 
     def __init__(self, reduction: str = 'mean') -> None:
         super().__init__(reduction=reduction)
-        self._giou_loss = generalized_box_iou_loss
+        self._giou = generalized_box_iou
 
     def forward(self, input: Tensor, target: Tensor) -> Tensor:
         """
@@ -26,4 +27,11 @@ class GIoULoss(_Loss):
         :return: loss
         :rtype: Tensor (float)
         """
-        return self._giou_loss(input, target, reduction=self.reduction)
+
+        loss = 1.0 - self._giou(input, target)
+
+        if self.reduction == "sum":
+            return loss.sum()
+        elif self.reduction == "mean":
+            return loss.mean()
+        return loss
