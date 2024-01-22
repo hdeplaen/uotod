@@ -87,6 +87,7 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
         matching = torch.zeros_like(cost_matrix)
 
         # Compute the matching
+        # hack: we don't need to pass the target mask since it is already taken into account in the histograms
         if self._individual:
             for idx in range(cost_matrix.size(0)):
                 matching[idx, :, :] = self._compute_matching_apart(cost_matrix.select(0, idx),
@@ -97,7 +98,7 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
         else:
             matching = self._compute_matching_together(cost_matrix,
                                                        matching,
-                                                       target_mask,
+                                                       target_mask=None,
                                                        reg=reg,
                                                        hist_pred=hist_pred,
                                                        hist_target=hist_target)

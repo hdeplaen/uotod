@@ -259,7 +259,6 @@ class DetectionLoss(_Loss):
 
         # Clamp the number of positive samples to 1, to avoid division by 0.
         num_pos_weighted = torch.clamp(num_pos_weighted, min=1.)
-        print(f"num_pos_weighted: {num_pos_weighted}, num_neg_weighted: {num_neg_weighted}")
 
         return num_pos_weighted, num_neg_weighted
 

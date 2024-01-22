@@ -53,6 +53,7 @@ class UnbalancedSinkhorn(_Compiled):
 
     def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
                                    **kwargs) -> Tensor:
+        # hack: we don't need to pass the target mask since it is already taken into account in the histograms
         return self._matching_method(kwargs['hist_pred'],
                                                   kwargs['hist_target'],
                                                   cost_matrix,
@@ -61,8 +62,7 @@ class UnbalancedSinkhorn(_Compiled):
                                                   self.reg_pred,
                                                   self.reg_target)
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                **kwargs) -> Tensor:
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, **kwargs) -> Tensor:
         return self._matching_method(kwargs['hist_pred'].unsqueeze(0),
                                                kwargs['hist_target'].unsqueeze(0),
                                                cost_matrix.unsqueeze(0),

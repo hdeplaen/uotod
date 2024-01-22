@@ -98,7 +98,7 @@ class Hungarian(_Match):
         return matching
 
     @torch.no_grad()
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Tensor) -> Tensor:
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor) -> Tensor:
         r"""
         This method makes use of Scipy's `linear_sum_assignment`.
         """

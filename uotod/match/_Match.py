@@ -79,8 +79,10 @@ class _Match(nn.Module, metaclass=ABCMeta):
             Tensor of shape (batch_size, num_pred, num_targets + 1). The last entry of the last dimension is the
             background.
         :rtype: Tensor (float) or Tuple(Tensor, Tensor)
-
         """
+        if target["mask"] is not None:
+            assert target["mask"].dtype == torch.bool, "The target mask must be of type bool."
+
         # emptying the cache
         self._last_cost = None
         self._last_match = None
@@ -148,7 +150,6 @@ class _Match(nn.Module, metaclass=ABCMeta):
             loc_cost = self._compute_loc_costs(anchors, target["boxes"])
         else:
             loc_cost = self._compute_loc_costs(input["pred_boxes"], target["boxes"])
-
         if cls_cost is not None and loc_cost is not None:
             cost_matrix = loc_cost + cls_cost
         elif cls_cost is None:
@@ -251,9 +252,12 @@ class _Match(nn.Module, metaclass=ABCMeta):
         else:
             if self._individual:
                 for idx in range(cost_matrix.size(0)):
-                    p[idx, :, :] = self._compute_matching_apart(cost_matrix.select(0, idx),
-                                                                p.select(0, idx),
-                                                                target_mask.select(0, idx))
+                    target_mask_batch = torch.cat([target_mask[idx, :], torch.ones(1, dtype=torch.bool,
+                                                                                   device=target_mask.device)])
+                    p[idx, :, target_mask_batch] = self._compute_matching_apart(
+                        cost_matrix.select(0, idx)[:, target_mask_batch],
+                        p.select(0, idx)[:, target_mask_batch]
+                    )
             else:
                 p = self._compute_matching_together(cost_matrix, p, target_mask)
         return p

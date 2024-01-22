@@ -29,8 +29,7 @@ class UnbalancedPOT(_POT, _Sinkhorn):
         super(UnbalancedPOT, self).__init__(**{'balanced': False, **kwargs})
         self.reg_pred_target = kwargs['reg_pred_target']
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                **kwargs):
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, **kwargs):
         return self._matching_method(a=kwargs['hist_pred'],
                                                b=kwargs['hist_target'],
                                                M=cost_matrix,

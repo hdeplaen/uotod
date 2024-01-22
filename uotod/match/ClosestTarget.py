@@ -19,7 +19,7 @@ class ClosestTarget(_Match):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor,
                                 **kwargs) -> Tensor:
         raise NotImplementedError
 

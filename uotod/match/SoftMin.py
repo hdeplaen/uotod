@@ -47,8 +47,7 @@ class SoftMin(_Match):
         else:
             raise NameError(f"The value for the closest can only be 'target' or 'prediction'.")
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                **kwargs) -> Tensor:
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, **kwargs) -> Tensor:
         raise NotImplementedError
 
     def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,

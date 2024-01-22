@@ -21,8 +21,7 @@ class BalancedPOT(_POT, _Sinkhorn):
             f"Only the following methods are available in the balanced case: {BalancedPOT.available_methods}"
         super(BalancedPOT, self).__init__(**{'balanced': True, **kwargs})
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                **kwargs):
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, **kwargs):
         return self._matching_method(a=kwargs['hist_pred'],
                                      b=kwargs['hist_target'],
                                      M=cost_matrix,

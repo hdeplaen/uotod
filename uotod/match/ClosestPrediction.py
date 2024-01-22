@@ -54,8 +54,7 @@ class ClosestPrediction(_Match):
                 "The uniform_background property is irrelevant when no background is specified")
         self._uniform_background = val
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                **kwargs) -> Tensor:
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, **kwargs) -> Tensor:
         raise NotImplementedError
 
     def _compute_matching_together(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,

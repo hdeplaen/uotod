@@ -165,8 +165,7 @@ class WeightedSum(_Match):
         """
         raise Exception('Not applicable')
 
-    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
-                                **kwargs) -> Tensor:
+    def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, **kwargs) -> Tensor:
         pass
 
     def plot(self, idx=0, img: Optional[Union[Tensor, ndarray]] = None,
