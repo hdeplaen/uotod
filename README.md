@@ -31,7 +31,6 @@ During training, supervised object detection tries to correctly match the predic
 
 Using PyPI, it suffices to run :code:`pip install uotod`. Just rerun this command to update the package to its newest version.
 
-
 ### Build From Source
 
 You can also download it directly from the GitHub repository, then build and install it.
@@ -44,7 +43,23 @@ python3 -m setup build
 python3 -m pip install
  ```
 
+### Compiled Acceleration
 
+The package is **available on all dsitributions** and runs well. However, only the combinations marked with a green ✅ can 
+take advantage from the compiled version of Sinkhorn's algorithm directly from PyPI. On a not support combination, you may always build it 
+from the source to also have access to Sinkhorn's compiled version of the algorithm. Nevertheless, the PyTorch implementation 
+of **Sinkhorn's algorithm is always available** (used by default), this only refers to an additional compiled version. 
+
+| **OS**          	| **Linux** 	| **MacOS** 	 | **Windows** 	|
+|-----------------	|:---------:	|:-----------:|:-----------:	|
+| **Python 3.8**  	|     ✅     	|   ✅     	   |      ☑️      	|
+| **Python 3.9**  	|     ✅     	|   ✅     	   |      ☑️      	|
+| **Python 3.10** 	|     ✅     	|   ✅     	   |      ☑️      	|
+| **Python 3.11** 	|     ✅     	|   ✅     	   |      ☑️      	|
+| **Python 3.12** 	|     ✅     	|     ☑️       |      ☑️      	|
+
+- ✅: Python implementation + compiled acceleration, _both directly from PyPI_
+- ☑️: Python implementation _directly from PyPI_ (+ possible compiled acceleration if building from source)
 
 ## Examples
 
