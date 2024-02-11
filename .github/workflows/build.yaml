@@ -12,8 +12,8 @@ jobs:
             - os: ubuntu-latest
               os-name: Linux
               pip-cache-path: ~/.cache/pip
-            - os: macos-latest
-              os-name: MacOS
+            - os: macos-13
+              os-name: MacOS 13
               pip-cache-path: ~/Library/Caches/pip
             - os: windows-latest
               os-name: Windows
