@@ -1,8 +1,9 @@
 # Unbalanced Optimal Transport: A Unified Framework for Object Detection
-[Website](https://hdeplaen.github.io/uotod/)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[Paper](https://openaccess.thecvf.com/content/CVPR2023/papers/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.pdf)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[Supplementary](https://openaccess.thecvf.com/content/CVPR2023/supplemental/De_Plaen_Unbalanced_Optimal_Transport_CVPR_2023_supplemental.pdf)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[Documentation](https://uotod.readthedocs.io/en/latest/)
+<a href="https://hdeplaen.github.io/uotod/" target="_blank">Website</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://openaccess.thecvf.com/content/CVPR2023/papers/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.pdf" target="_blank">Paper</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://openaccess.thecvf.com/content/CVPR2023/supplemental/De_Plaen_Unbalanced_Optimal_Transport_CVPR_2023_supplemental.pdf" target="_blank">Supplementary</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://uotod.readthedocs.io/en/latest/" target="_blank">Documentation</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 ![GitHub License](https://img.shields.io/github/license/hdeplaen/uotod)
 ![PyPI - Version](https://img.shields.io/pypi/v/uotod)
