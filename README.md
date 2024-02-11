@@ -11,7 +11,6 @@
 [![Documentation Status](https://readthedocs.org/projects/uotod/badge/?version=latest)](https://uotod.readthedocs.io/en/latest/?badge=latest)
 ![Test Status](https://github.com/hdeplaen/uotod/actions/workflows/test.yaml/badge.svg)
 ![Build Status](https://github.com/hdeplaen/uotod/actions/workflows/build.yaml/badge.svg)
-![Publish Status](https://github.com/hdeplaen/uotod/actions/workflows/publish.yaml/badge.svg)
 
 [//]: # (![GitHub all releases]&#40;https://img.shields.io/github/downloads/hdeplaen/uotod/total&#41;)
 

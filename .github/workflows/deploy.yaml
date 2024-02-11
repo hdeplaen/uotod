@@ -1,9 +1,10 @@
 name: deploy
 on:
   workflow_run:
-    workflows: ["build", "test"]
-    types:
-        - completed
+    workflows: [build]
+    types: [completed]
+    branches: [main]
+
 
 jobs:
   publish-to-testpypi:
@@ -17,8 +18,9 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
+          run_id: ${{ github.event.workflow_run.id }}
           name: python-package-distributions
           path: dist/
       - name: Publishing
@@ -37,8 +39,9 @@ jobs:
       id-token: write
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
+          run_id: ${{ github.event.workflow_run.id }}
           name: python-package-distributions
           path: dist/
       - name: Publishing
@@ -56,8 +59,9 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
+          run_id: ${{ github.event.workflow_run.id }}
           name: python-package-distributions
           path: dist/
       - name: Sign the dists with Sigstore
