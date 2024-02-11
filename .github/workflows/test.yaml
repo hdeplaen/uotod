@@ -15,9 +15,9 @@ jobs:
               os-name: MacOS
               pip-cache-path: ~/Library/Caches/pip
             - os: windows-latest
-              os-name: w32
+              os-name: Windows
               pip-cache-path: ~\AppData\Local\pip\Cache
-      name: 🧪 Test ${{ matrix.python-version }}@${{ matrix.os-name }}
+      name: 🧪 Test py${{ matrix.python-version }} @ ${{ matrix.os-name }}
       runs-on: ${{ matrix.os }}
 
       steps:
