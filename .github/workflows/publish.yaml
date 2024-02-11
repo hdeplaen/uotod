@@ -7,6 +7,7 @@ on:
 
 jobs:
   publish-to-testpypi:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: 📦 Publish distribution to TestPyPI
     runs-on: ubuntu-latest
     environment:
@@ -27,7 +28,7 @@ jobs:
 
   publish-to-pypi:
     name: 📦 Publish to PyPI
-    if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
+    if: startsWith(github.ref, 'refs/tags/') && ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: pypi
