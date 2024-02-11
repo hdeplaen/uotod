@@ -30,6 +30,8 @@ jobs:
             python-version: ${{ matrix.python-version }}
         - name: Install pypa/build
           run: python -m pip install build --user --upgrade --progress-bar off
+        - name: Compiler version
+          run: cc --version
         - name: Building
           run: python -m build
         - name: Store distribution
