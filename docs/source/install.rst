@@ -9,15 +9,15 @@ PyPI
 Using PyPI, it suffices to run :code:`pip install uotod`. Just rerun this command to update the package to its newest version.
 
 
-From Source
------------
+Build From Source
+-----------------
 
-You can also install the latest version of the package directly from the GitHub repository.
+You can also download it directly from the GitHub repository, then build and install it.
 
 .. code-block:: bash
 
     git clone --recursive https://github.com/hdeplaen/uotod
     cd uotod
     python3 -m pip install -r requirements.txt
-    python3 -m setup.py build
+    python3 -m setup build
     python3 -m pip install

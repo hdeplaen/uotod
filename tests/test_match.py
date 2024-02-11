@@ -1,5 +1,9 @@
 import unittest
 import itertools
+import sys
+import os
+
+sys.path.append(os.path.abspath('src'))
 import uotod
 from uotod.sample import input, target
 

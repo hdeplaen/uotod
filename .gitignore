@@ -7,3 +7,4 @@ uotod/compiled*
 build/
 docs/build/
 docs/example/
+/src/uotod.egg-info/
