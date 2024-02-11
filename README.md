@@ -9,8 +9,8 @@
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/uotod)
 ![PyPI - Version](https://img.shields.io/pypi/v/uotod)
 [![Documentation Status](https://readthedocs.org/projects/uotod/badge/?version=latest)](https://uotod.readthedocs.io/en/latest/?badge=latest)
-![Test Status](https://github.com/hdeplaen/uotod/actions/workflows/test.yaml/badge.svg)
-![Build Status](https://github.com/hdeplaen/uotod/actions/workflows/build.yaml/badge.svg)
+[![Test Status](https://github.com/hdeplaen/uotod/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/hdeplaen/uotod/actions/workflows/test.yaml)
+[![Build Status](https://github.com/hdeplaen/uotod/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/hdeplaen/uotod/actions/workflows/build.yaml)
 
 [//]: # (![GitHub all releases]&#40;https://img.shields.io/github/downloads/hdeplaen/uotod/total&#41;)
 
@@ -18,7 +18,7 @@ H. De Plaen, P.-F. De Plaen, J. A. K. Suykens, M. Proesmans, T. Tuytelaars, and 
 
 This work has be presented at CVPR 2023 in Vancouver, Canada. The paper and additional resources can be found on the [following website](https://hdeplaen.github.io/uotod/). The paper is in open access and can also be found on the [CVF website](https://openaccess.thecvf.com/content/CVPR2023/html/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.html) as well as on [IEEE Xplore](https://ieeexplore.ieee.org/document/10204500).
 
-![Different matching strategies. All are particular cases of Unbalanced Optimal Transport](img/illustration.png)
+<img src="https://hdeplaen.github.io/uotod/img/illustration.png" alt="Different matching strategies. All are particular cases of Unbalanced Optimal Transport"/>
 
 ## Abstract
 *TL;DR: We introduce a much more versatile new class of matching strategies unifying many existing ones, as well as being well suited for GPUs.*
@@ -153,7 +153,7 @@ loss_value = loss(preds, targets)
 
 
 ## Color Boxes Dataset
-![Examples from the Color Boxes Dataset](img/colorboxes.png)
+<img src="https://hdeplaen.github.io/uotod/img/colorboxes.png" alt="Examples from the Color Boxes Dataset"/>
 
 ## BibTex
 If you make any use of our work, please refer to us as:
