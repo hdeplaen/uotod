@@ -1,6 +1,3 @@
-from typing import Optional
-
-import torch
 from torch import Tensor
 
 from ._POT import _POT

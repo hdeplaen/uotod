@@ -1,0 +1,6 @@
+recursive-include src/cpp
+recursive-exclude docs
+recursive-exclude example
+recursive-exclude img
+recursive-exclude tests
+global-exclude *.o *.so *.dylib *.a .git *.pyc *.swp
