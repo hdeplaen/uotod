@@ -17,5 +17,7 @@ You can also install the latest version of the package directly from the GitHub 
 .. code-block:: bash
 
     git clone --recursive https://github.com/hdeplaen/uotod
-    python uotod/setup.py build
-    pip install uotod
+    cd uotod
+    python3 -m pip install -r requirements.txt
+    python3 -m setup.py build
+    python3 -m pip install
