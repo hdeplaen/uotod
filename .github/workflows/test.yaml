@@ -28,9 +28,9 @@ jobs:
           with:
             python-version: ${{ matrix.python-version }}
         - name: Install dependencies
-          run: >+
-            python3 -m pip install --user --upgrade --progress-bar off -r requirements.txt
-            python3 -m pip install --user --upgrade --progress-bas off -r tests/requirements.txt
+          run: |
+            python -m pip install --user --upgrade --progress-bar off -r requirements.txt
+            python -m pip install --user --upgrade --progress-bas off -r tests/requirements.txt
         - name: Testing
           run: python -m pytest
           
