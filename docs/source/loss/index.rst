@@ -9,7 +9,7 @@ This package provides a comprehensive formulation of loss functions specifically
 This package also provides a set of loss functions that are commonly used in object detection tasks, such as the :class:`SigmoidFocalLoss <uotod.loss.SigmoidFocalLoss>` and the :class:`GIoULoss <uotod.loss.GIoULoss>`.
 
 Different Losses
-======
+================
 
 .. toctree::
     :maxdepth: 2
@@ -21,8 +21,8 @@ Different Losses
 Examples
 ========
 
-Commonly used loss functions
-========
+Commonly Used Loss Functions
+============================
 
 .. toctree::
     :maxdepth: 1

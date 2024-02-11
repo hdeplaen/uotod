@@ -4,4 +4,4 @@ from .IoULoss import IoULoss
 from .SigmoidFocalLoss import SigmoidFocalLoss, SigmoidFocalCost
 
 from .DetectionLoss import DetectionLoss
-from.MultipleObjectiveLoss import MultipleObjectiveLoss
+from .MultipleObjectiveLoss import MultipleObjectiveLoss

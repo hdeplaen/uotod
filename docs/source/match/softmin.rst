@@ -39,7 +39,9 @@ Simple Example
 .. plot:: ../../example/match/softmin.py
     :include-source:
 
-.. include:: _min_balanced.rst
+.. include:: _min_balanced_pred.rst
+
+.. include:: _min_balanced_target.rst
 
 .. include:: _unmatched_to_background.rst
 

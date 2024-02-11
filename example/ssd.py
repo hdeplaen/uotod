@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 import uotod
-from sample import input, target, img, anchors
+from uotod.sample import input, target, anchors
 
 
 matching_method = uotod.match.UnbalancedSinkhorn(

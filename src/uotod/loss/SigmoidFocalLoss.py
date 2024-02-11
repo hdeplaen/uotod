@@ -73,7 +73,7 @@ class SigmoidFocalCost(_Loss):
     where :math:`p_y = \sigma(x_y)` is the probability of the target class y, :math:`\gamma` is the focusing parameter, and
     :math:`\alpha` is the weighting factor.
 
-    It was introduced in the paper `Deformable DETR: Deformable Transformers for End-to-End Object Detection`_.
+    It was introduced in the paper :cite:`zhu2020deformabledetr`.
 
     :param reduction: Specifies the reduction to apply to the output: 'none' | 'mean' | 'sum'.
     :param alpha: Weighting factor alpha (default: -1.)

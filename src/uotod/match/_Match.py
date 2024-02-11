@@ -252,8 +252,11 @@ class _Match(nn.Module, metaclass=ABCMeta):
         else:
             if self._individual:
                 for idx in range(cost_matrix.size(0)):
-                    target_mask_batch = torch.cat([target_mask[idx, :], torch.ones(1, dtype=torch.bool,
-                                                                                   device=target_mask.device)])
+                    if self.background:
+                        target_mask_batch = torch.cat([target_mask[idx, :], torch.ones(1, dtype=torch.bool,
+                                                                                       device=target_mask.device)])
+                    else:
+                        target_mask_batch = target_mask[idx, :]
                     p[idx, :, target_mask_batch] = self._compute_matching_apart(
                         cost_matrix.select(0, idx)[:, target_mask_batch],
                         p.select(0, idx)[:, target_mask_batch]
@@ -270,7 +273,7 @@ class _Match(nn.Module, metaclass=ABCMeta):
     @abstractmethod
     def _compute_matching_apart(self, cost_matrix: Tensor, out_view: Tensor, target_mask: Optional[Tensor] = None,
                                 **kwargs) -> Tensor:
-        raise NotImplementedError
+        pass
 
     def plot(self, idx=0, img: Optional[Union[Tensor, ndarray]] = None,
              plot_cost: bool = True,

@@ -9,18 +9,18 @@ class TestMatch(unittest.TestCase):
         super(TestMatch, self).__init__(*args, **kwargs)
 
     def test_hungarian(self):
-        L = uotod.loss.GIoULoss()
+        L = uotod.loss.GIoULoss(reduction='none')
 
         background_args = [True, False]
 
         for background_arg in background_args:
             H = uotod.match.Hungarian(loc_match_module=L,
                                       background=background_arg,
-                                      bg_cost=0.8)
+                                      background_cost=0.8)
             H(input, target)
 
     def test_min(self):
-        L = uotod.loss.GIoULoss()
+        L = uotod.loss.GIoULoss(reduction='none')
 
         background_args = [True, False]
         source_args = ['target', 'prediction']
@@ -34,22 +34,22 @@ class TestMatch(unittest.TestCase):
             H(input, target)
 
     def test_softmin(self):
-        L = uotod.loss.GIoULoss()
+        L = uotod.loss.GIoULoss(reduction='none')
 
         background_args = [True, False]
 
         for background_arg in background_args:
             H = uotod.match.SoftMin(loc_match_module=L,
                                       background=background_arg,
-                                      bg_cost=0.8)
+                                      background_cost=0.8)
             H(input, target)
 
     def test_balanced(self):
-        L = uotod.loss.GIoULoss()
-        H = uotod.match.BalancedSinkhorn(loc_match_module=L, bg_cost=0.8)
+        L = uotod.loss.GIoULoss(reduction='none')
+        H = uotod.match.BalancedSinkhorn(loc_match_module=L, background_cost=0.8)
         H(input, target)
 
     def test_unbalanced(self):
-        L = uotod.loss.GIoULoss()
-        H = uotod.match.UnbalancedSinkhorn(loc_match_module=L, bg_cost=0.8)
+        L = uotod.loss.GIoULoss(reduction='none')
+        H = uotod.match.UnbalancedSinkhorn(loc_match_module=L, background_cost=0.8)
         H(input, target)

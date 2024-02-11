@@ -1,3 +1,5 @@
 torch
+torchvision
 matplotlib
 numpy
+pot

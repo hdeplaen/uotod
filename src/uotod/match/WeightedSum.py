@@ -5,7 +5,7 @@ from numpy import ndarray
 import torch
 from torch import Tensor
 
-import uotod.plot
+from .. import plot
 from ..utils import kwargs_decorator
 from ._Match import _Match
 
@@ -230,7 +230,7 @@ class WeightedSum(_Match):
             costs: List[Tensor] = list()
             for c in self._last_cost:
                 costs.append(c[idx, :, :])
-            fig_costs = uotod.plot.multiple_costs(costs,
+            fig_costs = plot.multiple_costs(costs,
                                                   mask_pred=None,
                                                   mask_target=target_mask,
                                                   title='Costs in WeightedSum',
@@ -243,7 +243,7 @@ class WeightedSum(_Match):
             matchings: List[Tensor] = list()
             for m in self._all_matchings:
                 matchings.append(m[idx, :, :])
-            fig_matches = uotod.plot.multiple_matches(matchings,
+            fig_matches = plot.multiple_matches(matchings,
                                                   mask_pred=None,
                                                   mask_target=target_mask,
                                                   title='Matches in WeightedSum',

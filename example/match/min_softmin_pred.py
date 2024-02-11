@@ -1,5 +1,5 @@
 import uotod
-from uotod.sample import input, target, imgs
+from uotod.sample import input, target
 
 L = uotod.loss.GIoULoss(reduction='none')
 

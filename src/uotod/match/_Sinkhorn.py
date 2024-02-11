@@ -52,9 +52,14 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
         h_pred = torch.full((batch_size, num_pred), fill_value=1. / num_pred, device=cost_matrix.device,
                             requires_grad=False)
         h_tgt = torch.zeros((batch_size, num_tgt), device=cost_matrix.device, requires_grad=False)
-        h_tgt[:, -1] = (num_pred - num_tgt_batch) / num_pred
-        for b in range(batch_size):
-            h_tgt[b, :num_tgt_batch[b]] = 1. / num_pred
+        if self.background:
+            h_tgt[:, -1] = (num_pred - num_tgt_batch) / num_pred
+            for b in range(batch_size):
+                h_tgt[b, :num_tgt_batch[b]] = 1. / num_pred
+        else:
+            for b in range(batch_size):
+                num_tgt_b = num_tgt_batch[b]
+                h_tgt[b, :num_tgt_b] = 1. / num_tgt_b
 
         return h_pred, h_tgt
 
@@ -66,8 +71,7 @@ class _Sinkhorn(_Match, metaclass=ABCMeta):
         using the Sinkhorn algorithm.
         :param cost_matrix: the cost matrix. Tensor of shape (batch_size, num_pred, num_tgt + 1).
         :param target_mask: the target mask. Tensor of shape (batch_size, num_tgt).
-        :return: the matching. Tensor of shape (batch_size, num_pred, num_tgt + 1). The last entry of the last
-            dimension is the background.
+        :return: the matching. Tensor of shape (batch_size, num_pred, num_tgt + 1). The last entry of the last dimension is the background.
         """
         num_pred = cost_matrix.shape[1]
         # Compute the histograms
