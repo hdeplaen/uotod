@@ -1,21 +1,23 @@
 # Unbalanced Optimal Transport: A Unified Framework for Object Detection
-<a href="https://hdeplaen.github.io/uotod/" target="_blank">Website</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://hdeplaen.github.io/uotod/" target="_blank">Presentation</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="https://openaccess.thecvf.com/content/CVPR2023/papers/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.pdf" target="_blank">Paper</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="https://openaccess.thecvf.com/content/CVPR2023/supplemental/De_Plaen_Unbalanced_Optimal_Transport_CVPR_2023_supplemental.pdf" target="_blank">Supplementary</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="https://uotod.readthedocs.io/en/latest/" target="_blank">Documentation</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 ![GitHub License](https://img.shields.io/github/license/hdeplaen/uotod)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/uotod)
 ![PyPI - Version](https://img.shields.io/pypi/v/uotod)
 [![Documentation Status](https://readthedocs.org/projects/uotod/badge/?version=latest)](https://uotod.readthedocs.io/en/latest/?badge=latest)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/uotod)
-
+![Test Status](https://github.com/hdeplaen/uotod/actions/workflows/test.yaml/badge.svg)
+![Build Status](https://github.com/hdeplaen/uotod/actions/workflows/build.yaml/badge.svg)
+![Publish Status](https://github.com/hdeplaen/uotod/actions/workflows/publish.yaml/badge.svg)
 
 [//]: # (![GitHub all releases]&#40;https://img.shields.io/github/downloads/hdeplaen/uotod/total&#41;)
 
 H. De Plaen, P.-F. De Plaen, J. A. K. Suykens, M. Proesmans, T. Tuytelaars, and L. Van Gool, “Unbalanced Optimal Transport: A Unified Framework for Object Detection,” in *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)*, Jun. 2023, pp. 3198–3207.
 
-This work has be presented at CVPR 2023 in Vancouver, Canada. The paper and additional resources can be found on the [following website](https://hdeplaen.github.io/uotod/). The paper is in open access and can also be found on the [CVF website](https://openaccess.thecvf.com/content/CVPR2023/html/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.html) and shortly on IEEE Xplore.
+This work has be presented at CVPR 2023 in Vancouver, Canada. The paper and additional resources can be found on the [following website](https://hdeplaen.github.io/uotod/). The paper is in open access and can also be found on the [CVF website](https://openaccess.thecvf.com/content/CVPR2023/html/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.html) as well as on [IEEE Xplore](https://ieeexplore.ieee.org/document/10204500).
 
 ![Different matching strategies. All are particular cases of Unbalanced Optimal Transport](img/illustration.png)
 

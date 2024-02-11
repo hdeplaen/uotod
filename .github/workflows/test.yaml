@@ -17,7 +17,7 @@ jobs:
             - os: windows-latest
               os-name: w32
               pip-cache-path: ~\AppData\Local\pip\Cache
-      name: 🧪 Test distribution ${{ matrix.python-version }}@${{ matrix.os-name }}
+      name: 🧪 Test ${{ matrix.python-version }}@${{ matrix.os-name }}
       runs-on: ${{ matrix.os }}
 
       steps:
@@ -28,7 +28,7 @@ jobs:
           with:
             python-version: ${{ matrix.python-version }}
         - name: Install dependencies
-          run: >-
+          run: >+
             python3 -m pip install --user --upgrade --progress-bar off -r requirements.txt
             python3 -m pip install --user --upgrade --progress-bas off -r tests/requirements.txt
         - name: Testing
