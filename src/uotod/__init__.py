@@ -1,4 +1,4 @@
-__version__ = "0.3rc3"
+__version__ = "0.3rc5"
 __author__ = "HENRI & PIERRE-FRANCOIS DE PLAEN"
 __credits__ = "KU Leuven"
 __status__ = "beta"
