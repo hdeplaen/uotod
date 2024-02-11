@@ -53,7 +53,11 @@ ESAT-STADIUS = "https://www.esat.kuleuven.be/stadius/"
 ESAT-PSI = "https://www.esat.kuleuven.be/psi/"
 
 [build-system]
-requires = ["setuptools", "torch"]
+requires = [
+    "setuptools",
+    'torch=2.1.2 ; platform_system == "Darwin"',
+    'torch ; platform_system == "Linux"'
+]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
