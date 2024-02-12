@@ -1,5 +1,5 @@
 recursive-include src/cpp *.*
-recursive-include img *.*
+recursive-exclude img *.*
 recursive-exclude docs *.*
 recursive-exclude example *.*
 recursive-exclude tests *.*

@@ -9,8 +9,10 @@
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/uotod)
 ![PyPI - Version](https://img.shields.io/pypi/v/uotod)
 [![Documentation Status](https://readthedocs.org/projects/uotod/badge/?version=latest)](https://uotod.readthedocs.io/en/latest/?badge=latest)
-[![Test Status](https://github.com/hdeplaen/uotod/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/hdeplaen/uotod/actions/workflows/test.yaml)
-[![Build Status](https://github.com/hdeplaen/uotod/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/hdeplaen/uotod/actions/workflows/build.yaml)
+
+[//]: # ([![Test Status]&#40;https://github.com/hdeplaen/uotod/actions/workflows/test.yaml/badge.svg?branch=main&#41;]&#40;https://github.com/hdeplaen/uotod/actions/workflows/test.yaml&#41;)
+
+[//]: # ([![Build Status]&#40;https://github.com/hdeplaen/uotod/actions/workflows/build.yaml/badge.svg?branch=main&#41;]&#40;https://github.com/hdeplaen/uotod/actions/workflows/build.yaml&#41;)
 
 [//]: # (![GitHub all releases]&#40;https://img.shields.io/github/downloads/hdeplaen/uotod/total&#41;)
 
