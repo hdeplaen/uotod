@@ -104,12 +104,6 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Wait for Build
-        uses: lewagon/wait-on-check-action@v1.3.1
-        with:
-          ref: ${{ github.ref }}
-          check-name: 'Run tests'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Download all the dists
         uses: actions/download-artifact@v3
         with:
