@@ -73,7 +73,6 @@ jobs:
 
   publish-to-testpypi:
     needs: test
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: 📦 Publish distribution to TestPyPI
     runs-on: ubuntu-latest
     environment:

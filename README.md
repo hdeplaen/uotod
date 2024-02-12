@@ -102,7 +102,7 @@ matching_method = UnbalancedSinkhorn(
     reg_target=1e-3,  # Relax the constraint that each ground truth is matched to exactly one prediction
 )
 
-loss = DetectionLoss(
+criterion = DetectionLoss(
     matching_method=matching_method,
     cls_loss_module=CrossEntropyLoss(reduction="none"),
     loc_loss_module=L1Loss(reduction="none"),
@@ -112,10 +112,10 @@ preds = ...
 targets = ...
 anchors = ...
 
-loss_value = loss(preds, targets, anchors)
+loss_value = criterion(preds, targets, anchors)
 ```
 
-### Loss from DETR solved with Optimal Transport (num_classes=3):
+### Loss from DETR solved with Optimal Transport (with 2 classes):
 
 ```python
 import torch
@@ -134,7 +134,7 @@ matching_method = BalancedSinkhorn(
     background_cost=0.,  # Does not influence the matching when using balanced OT
 )
 
-loss = DetectionLoss(
+criterion = DetectionLoss(
     matching_method=matching_method,
     cls_loss_module=CrossEntropyLoss(
         reduction="none",
@@ -148,11 +148,34 @@ loss = DetectionLoss(
 
 preds = ...
 targets = ...
-loss_value = loss(preds, targets)
+loss_value = criterion(preds, targets)
 ```
 
 
 ## Color Boxes Dataset
+
+The Color Boxes dataset is composed of 4800 training images and 960 validation images. The images are 500x400 pixels and contain 0 to 30 colored boxes. The boxes are randomly placed and have random colors, which defines the class of the box (20 classes). The dataset is designed to be simple and easy to use for testing object detection algorithms.
+
+You can download the dataset at the following address: [Color Boxes Dataset](https://homes.esat.kuleuven.be/~pdeplaen/colorboxes.zip). 
+
+The dataset uses the COCO annotation format and is organized as follows:
+```
+path/to/colorboxes/
+  annotations/ 
+    instances_train.json
+    instances_val.json
+  train/
+    00000.jpg
+    00001.jpg
+    ...
+  val/
+    00000.jpg
+    00001.jpg
+    ...
+```
+
+
+
 ![Examples from the Color Boxes Dataset](img/colorboxes.png)
 
 ## Citation

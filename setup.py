@@ -2,7 +2,7 @@ from setuptools import setup
 from sys import platform, version_info
 
 if __name__ == "__main__":
-    if platform == "win32" or platform: # windows (not supported yet)
+    if platform == "win32":  # windows (not supported yet)
         # extra_compile_args = ['/O2', '/std:c++17']
         setup()
     elif platform == 'darwin' and version_info.minor > 11 : # mac greater than python 3.11

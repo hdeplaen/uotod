@@ -1,8 +1,8 @@
-__version__ = "0.3.post2"
+__version__ = "0.3.1rc1"
 __author__ = "HENRI & PIERRE-FRANCOIS DE PLAEN"
 __credits__ = "KU Leuven"
 __status__ = "beta"
-__date__ = "January 2024"
+__date__ = "February 2024"
 
 # IMPORTS
 from . import sample
