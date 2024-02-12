@@ -18,7 +18,7 @@ H. De Plaen, P.-F. De Plaen, J. A. K. Suykens, M. Proesmans, T. Tuytelaars, and 
 
 This work has be presented at CVPR 2023 in Vancouver, Canada. The paper and additional resources can be found on the [following website](https://hdeplaen.github.io/uotod/). The paper is in open access and can also be found on the [CVF website](https://openaccess.thecvf.com/content/CVPR2023/html/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.html) as well as on [IEEE Xplore](https://ieeexplore.ieee.org/document/10204500).
 
-![Different matching strategies. All are particular cases of Unbalanced Optimal Transport](img/illustration.jpg)
+![Different matching strategies. All are particular cases of Unbalanced Optimal Transport](img/illustration.png)
 
 ## Abstract
 *TL;DR: We introduce a much more versatile new class of matching strategies unifying many existing ones, as well as being well suited for GPUs.*
