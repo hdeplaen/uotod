@@ -171,9 +171,9 @@ If you make any use of our work, please refer to us as:
 ## Acknowledgements
 EU: The research leading to these results has received funding from the European Research Council under the European Union’s Horizon 2020 research and innovation program / ERC Advanced Grant E-DUALITY (787960). This paper reflects only the authors’ views and the Union is not liable for any use that may be made of the contained information. Research Council KUL: Optimization frameworks for deep kernel machines C14/18/068. Flemish Government: FWO: projects: GOA4917N (Deep Restricted Kernel Machines: Methods and Foundations), PhD/Postdoc grant; This research received funding from the Flemish Government (AI Research Program). All the authors are also affiliated to Leuven.AI - KU Leuven institute for AI, B-3000, Leuven, Belgium.
 <p style="text-align: center;">
-<img src="img/eu.png" alt="European Union" style="height:80px;"/>
-<img src="img/erc.png" alt="European Research Council" style="height:80px;"/>
-<img src="img/fwo.png" alt="Fonds voor Wetenschappelijk Onderzoek" style="height:80px;"/>
-<img src="img/vl.png" alt="Flanders AI" style="height:80px;"/>
-<img src="img/kuleuven.png" alt="KU Leuven" style="height:80px;"/>
+<img src="https://hdeplaen.github.io/uotod/img/eu.png" alt="European Union" style="height:80px;"/>
+<img src="https://hdeplaen.github.io/uotod/img/erc.png" alt="European Research Council" style="height:80px;"/>
+<img src="https://hdeplaen.github.io/uotod/img/fwo.png" alt="Fonds voor Wetenschappelijk Onderzoek" style="height:80px;"/>
+<img src="https://hdeplaen.github.io/uotod/img/vl.png" alt="Flanders AI" style="height:80px;"/>
+<img src="https://hdeplaen.github.io/uotod/img/kuleuven.png" alt="KU Leuven" style="height:80px;"/>
 </p>
