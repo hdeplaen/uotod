@@ -18,7 +18,7 @@ H. De Plaen, P.-F. De Plaen, J. A. K. Suykens, M. Proesmans, T. Tuytelaars, and 
 
 This work has be presented at CVPR 2023 in Vancouver, Canada. The paper and additional resources can be found on the [following website](https://hdeplaen.github.io/uotod/). The paper is in open access and can also be found on the [CVF website](https://openaccess.thecvf.com/content/CVPR2023/html/De_Plaen_Unbalanced_Optimal_Transport_A_Unified_Framework_for_Object_Detection_CVPR_2023_paper.html) as well as on [IEEE Xplore](https://ieeexplore.ieee.org/document/10204500).
 
-<img src="https://hdeplaen.github.io/uotod/img/illustration.png" alt="Different matching strategies. All are particular cases of Unbalanced Optimal Transport"/>
+![Different matching strategies. All are particular cases of Unbalanced Optimal Transport](img/illustration.jpg)
 
 ## Abstract
 *TL;DR: We introduce a much more versatile new class of matching strategies unifying many existing ones, as well as being well suited for GPUs.*
@@ -28,7 +28,7 @@ During training, supervised object detection tries to correctly match the predic
 ## Install
 ### PyPI
 
-Using PyPI, it suffices to run :code:`pip install uotod`. Just rerun this command to update the package to its newest version.
+Using PyPI, it suffices to run `pip install uotod`. Just rerun this command to update the package to its newest version.
 
 ### Build From Source
 
@@ -45,7 +45,7 @@ python3 -m pip install
 ### Compiled Acceleration
 
 The package is **available on all dsitributions** and runs well. However, only the combinations marked with a green ✅ can 
-take advantage from the compiled version of Sinkhorn's algorithm directly from PyPI. On a not support combination, you may always build it 
+take advantage of the compiled version of Sinkhorn's algorithm directly from PyPI. On a not support combination, you may always build it 
 from the source to also have access to Sinkhorn's compiled version of the algorithm. Nevertheless, the PyTorch implementation 
 of **Sinkhorn's algorithm is always available** (used by default), this only refers to an additional compiled version. 
 
@@ -153,9 +153,9 @@ loss_value = loss(preds, targets)
 
 
 ## Color Boxes Dataset
-<img src="https://hdeplaen.github.io/uotod/img/colorboxes.png" alt="Examples from the Color Boxes Dataset"/>
+![Examples from the Color Boxes Dataset](img/colorboxes.png)
 
-## BibTex
+## Citation
 If you make any use of our work, please refer to us as:
 ```bibtex
 @InProceedings{De_Plaen_2023_CVPR,
@@ -171,9 +171,9 @@ If you make any use of our work, please refer to us as:
 ## Acknowledgements
 EU: The research leading to these results has received funding from the European Research Council under the European Union’s Horizon 2020 research and innovation program / ERC Advanced Grant E-DUALITY (787960). This paper reflects only the authors’ views and the Union is not liable for any use that may be made of the contained information. Research Council KUL: Optimization frameworks for deep kernel machines C14/18/068. Flemish Government: FWO: projects: GOA4917N (Deep Restricted Kernel Machines: Methods and Foundations), PhD/Postdoc grant; This research received funding from the Flemish Government (AI Research Program). All the authors are also affiliated to Leuven.AI - KU Leuven institute for AI, B-3000, Leuven, Belgium.
 <p style="text-align: center;">
-<img src="https://hdeplaen.github.io/uotod/img/eu.png" alt="European Union" style="height:80px;"/>
-<img src="https://hdeplaen.github.io/uotod/img/erc.png" alt="European Research Council" style="height:80px;"/>
-<img src="https://hdeplaen.github.io/uotod/img/fwo.png" alt="Fonds voor Wetenschappelijk Onderzoek" style="height:80px;"/>
-<img src="https://hdeplaen.github.io/uotod/img/vl.png" alt="Flanders AI" style="height:80px;"/>
-<img src="https://hdeplaen.github.io/uotod/img/kuleuven.png" alt="KU Leuven" style="height:80px;"/>
+<img src="img/eu.png" alt="European Union" style="height:80px;"/>
+<img src="img/erc.png" alt="European Research Council" style="height:80px;"/>
+<img src="img/fwo.png" alt="Fonds voor Wetenschappelijk Onderzoek" style="height:80px;"/>
+<img src="img/vl.png" alt="Flanders AI" style="height:80px;"/>
+<img src="img/kuleuven.png" alt="KU Leuven" style="height:80px;"/>
 </p>
