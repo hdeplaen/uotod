@@ -40,7 +40,7 @@ jobs:
       - name: Install pypa/cbuildwheel
         run: python -m pip install cibuildwheel==2.16.5 --user --upgrade --progress-bar off
       - name: Building
-        run: python -m cibuildwheel -output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse
       - name: Store distribution
         uses: actions/upload-artifact@v3
         with:
