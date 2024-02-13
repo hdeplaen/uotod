@@ -51,13 +51,13 @@ take advantage of the compiled version of Sinkhorn's algorithm directly from PyP
 from the source to also have access to Sinkhorn's compiled version of the algorithm. Nevertheless, the PyTorch implementation 
 of **Sinkhorn's algorithm is always available** (used by default), this only refers to an additional compiled version. 
 
-| **OS**          	| **Linux** 	| **MacOS** 	 | **Windows** 	|
-|-----------------	|:---------:	|:-----------:|:-----------:	|
-| **Python 3.8**  	|     ✅     	|   ✅     	   |      ☑️      	|
-| **Python 3.9**  	|     ✅     	|   ✅     	   |      ☑️      	|
-| **Python 3.10** 	|     ✅     	|   ✅     	   |      ☑️      	|
-| **Python 3.11** 	|     ✅     	|   ✅     	   |      ☑️      	|
-| **Python 3.12** 	|     ✅     	|     ☑️       |      ☑️      	|
+| **OS**          	| **Linux<br/>(x86_64)** 	 | **MacOS<br/>(Intel, ARM)** 	 | **Windows<br/>and others** 	 |
+|-----------------	|:------------------------:|:----------------------------:|:----------------------------:|
+| **Python 3.8**  	|         ✅     	          |           ✅     	            |          ☑️      	           |
+| **Python 3.9**  	|         ✅     	          |           ✅     	            |          ☑️      	           |
+| **Python 3.10** 	|         ✅     	          |           ✅     	            |          ☑️      	           |
+| **Python 3.11** 	|         ✅     	          |           ✅     	            |          ☑️      	           |
+| **Python 3.12** 	|         ✅     	          |              ☑️              |          ☑️      	           |
 
 - ✅: Python implementation + compiled acceleration, _both directly from PyPI_
 - ☑️: Python implementation _directly from PyPI_ (+ possible compiled acceleration if building from source)
