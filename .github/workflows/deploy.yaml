@@ -25,7 +25,9 @@ jobs:
           - os: macos-13
             python-version: "3.12"
           - os: macos-14
-            python-version: [ "3.8", "3.9" ]
+            python-version: "3.8"
+          - os: macos-14
+            python-version: "3.10"
     name: 🛠️ Wheel py${{ matrix.python-version }} @ ${{ matrix.os-name }}
     runs-on: ${{ matrix.os }}
     steps:
@@ -42,7 +44,8 @@ jobs:
         env:
           CIBW_BUILD_FRONTEND: build
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          MACOSX_DEPLOYMENT_TARGET: "10.13"
+          MACOSX_DEPLOYMENT_TARGET: "10.11"
+          CIBW_ARCHS_MACOS: x86_64 arm64
       - name: Store distribution
         uses: actions/upload-artifact@v3
         with:
