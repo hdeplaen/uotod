@@ -6,16 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build_pyc_matrix_prep:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outpus.matrix }}
-    steps:
-
-
-
   build_pyc:
-    needs: build_pyc_matrix_prep
     strategy:
       fail-fast: false
       matrix:
