@@ -69,7 +69,7 @@ jobs:
           name: wheel-any-none
           path: ./dist/*.whl
           
-  make_sdist:
+  build_sdist:
     name: 🛠️ sdist
     runs-on: ubuntu-latest
     steps:
