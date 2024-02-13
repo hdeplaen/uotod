@@ -53,12 +53,7 @@ ESAT-STADIUS = "https://www.esat.kuleuven.be/stadius/"
 ESAT-PSI = "https://www.esat.kuleuven.be/psi/"
 
 [build-system]
-requires = [
-    "setuptools",
-    'torch==2.1.2 ; platform_system == "Darwin" and python_version<="3.11"',
-    'torch ; platform_system == "Darwin" and python_version>"3.11"',
-    'torch ; platform_system == "Linux"'
-]
+requires = [ "setuptools", "torch" ]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
@@ -67,7 +62,13 @@ version = {attr = "uotod.__version__"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.cibuildwheel]
+build-frontend = "build"
+build-verbosity = 1
+skip = ["pp*", "cp36-*", "cp37-*"]
+
 [tool.cibuildwheel.linux]
+archs = ["auto", "aarch64"]
 repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
 --exclude libtorch_python.so \
 --exclude libtorch.so \
@@ -79,6 +80,7 @@ repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
 --exclude libtorch_cuda.so"""
 
 [tool.cibuildwheel.macos]
+archs = ["x86", "universal2", "arm64"]
 repair-wheel-command = """delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} \
 --exclude @rpath/libtorch.dylib \
 --exclude @rpath/libtorch_cpu.dylib \
