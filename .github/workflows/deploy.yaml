@@ -32,7 +32,6 @@ jobs:
       - name: Store distribution
         uses: actions/upload-artifact@v3
         with:
-          name: wheel-${{ matrix.os }}
           path: dist/*.whl
 
   build_any:
@@ -52,7 +51,6 @@ jobs:
       - name: Store distribution
         uses: actions/upload-artifact@v3
         with:
-          name: wheel-any-none
           path: dist/*.whl
           
   build_sdist:
@@ -68,7 +66,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheel-sdist
           path: dist/*.tar.gz
 
   test:
@@ -111,6 +108,7 @@ jobs:
   publish-to-testpypi:
     needs: test
     name: 📦 Publish distribution to TestPyPI
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -121,7 +119,6 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          pattern: wheel-*
           path: dist
           merge-multiple: true
       - name: Publishing
@@ -143,7 +140,6 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          pattern: wheel-*
           path: dist
           merge-multiple: true
       - name: Publishing
@@ -160,7 +156,6 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          pattern: wheel-*
           path: dist
           merge-multiple: true
       - name: Sign the dists with Sigstore
