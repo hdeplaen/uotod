@@ -19,8 +19,6 @@ jobs:
             os-name: MacOS Intel
           - os: macos-14
             os-name: MacOS ARM
-          - os: windows-latest
-            os-name: Windows
         exclude:
           - os: macos-13
             python-version: "3.12"
