@@ -123,7 +123,7 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          name: python-dist
+          name: python-package-distributions
           path: dist/
           merge-multiple: true
       - name: Publishing
