@@ -9,6 +9,7 @@
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/uotod)
 ![PyPI - Version](https://img.shields.io/pypi/v/uotod)
 [![Documentation Status](https://readthedocs.org/projects/uotod/badge/?version=latest)](https://uotod.readthedocs.io/en/latest/?badge=latest)
+[![Citation Badge](https://api.juleskreuer.eu/citation-badge.php?doi=10.1109/CVPR52729.2023.00312)](https://juleskreuer.eu/citation-badge/)
 
 [//]: # ([![Test Status]&#40;https://github.com/hdeplaen/uotod/actions/workflows/test.yaml/badge.svg?branch=main&#41;]&#40;https://github.com/hdeplaen/uotod/actions/workflows/test.yaml&#41;)
 
